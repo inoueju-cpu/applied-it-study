@@ -168,9 +168,7 @@
             border: 1px solid var(--border-color);
         }
 
-        @media (max-width: 600px) {
-            .card-control-panel { grid-template-columns: 1fr; }
-        }
+        
 
         label {
             font-weight: 700;
@@ -568,10 +566,56 @@
 
         @media (max-width: 768px) {
             header h1 { font-size: 1.1rem; }
-            .action-bar { flex-direction: column; }
             .box-body { font-size: 1.1rem; }
             .tab-btn { font-size: 0.78rem; padding: 10px 2px; }
             th.col-expanded, td.col-expanded { width: 65% !important; }
+            
+            /* 1行キープ用レスポンシブ調整 */
+            .card-control-panel {
+                grid-template-columns: 1.15fr 0.85fr;
+                padding: 10px;
+                gap: 8px;
+            }
+            label {
+                font-size: 0.78rem;
+                margin-bottom: 2px;
+            }
+            select {
+                padding: 8px 6px;
+                font-size: 0.8rem;
+            }
+            .action-bar {
+                gap: 6px;
+            }
+            .btn {
+                font-size: 0.82rem;
+                padding: 10px 4px;
+                gap: 3px;
+                white-space: nowrap;
+            }
+        }
+
+        @media (max-width: 400px) {
+            .card-control-panel {
+                grid-template-columns: 1.1fr 0.9fr;
+                padding: 8px 6px;
+                gap: 5px;
+            }
+            label {
+                font-size: 0.72rem;
+            }
+            select {
+                padding: 6px 4px;
+                font-size: 0.75rem;
+            }
+            .action-bar {
+                gap: 4px;
+            }
+            .btn {
+                font-size: 0.72rem;
+                padding: 8px 2px;
+                letter-spacing: -0.2px;
+            }
         }
     </style>
 </head>
