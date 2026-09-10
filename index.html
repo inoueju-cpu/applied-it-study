@@ -954,6 +954,24 @@
             }
         }
 
+        function toggleCurrentStar() {
+            if (currentItem) {
+                toggleStar(currentItem.id);
+            }
+        }
+
+        function updateStarButtonState() {
+            const btn = document.getElementById("star-toggle-btn");
+            if (!btn) return;
+            if (currentItem && starredIds.has(currentItem.id)) {
+                btn.classList.add("starred");
+                btn.innerHTML = "★ 要復習から外す";
+            } else {
+                btn.classList.remove("starred");
+                btn.innerHTML = "☆ ★要復習に追加";
+            }
+        }
+
         function toggleCurrentMaster() {
             if (currentItem) {
                 toggleMaster(currentItem.id);
