@@ -916,24 +916,23 @@
             }
 
             renderMasterTable();
-            renderReviewTable();
+            
+            // 要復習テーブルの行は消さず、星アイコンの表示（★/☆）のみその場でトグル
+            updateStarIconsInTable(id);
         }
 
-        function toggleCurrentStar() {
-            if (currentItem) {
-                toggleStar(currentItem.id);
-            }
-        }
-
-        function updateStarButtonState() {
-            const btn = document.getElementById("star-toggle-btn");
-            if (currentItem && starredIds.has(currentItem.id)) {
-                btn.classList.add("starred");
-                btn.innerHTML = "★ 要復習から外す";
-            } else {
-                btn.classList.remove("starred");
-                btn.innerHTML = "☆ ★要復習に追加";
-            }
+        function updateStarIconsInTable(id) {
+            const isStarred = starredIds.has(id);
+            const icons = document.querySelectorAll(`.star-icon[data-id="${id}"]`);
+            icons.forEach(icon => {
+                if (isStarred) {
+                    icon.classList.add("active");
+                    icon.innerText = "★";
+                } else {
+                    icon.classList.remove("active");
+                    icon.innerText = "☆";
+                }
+            });
         }
 
         function updateStarBadge() {
@@ -1135,7 +1134,7 @@
                     const isStarred = starredIds.has(item.id);
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
-                        <td class="col-star" style="text-align:center;"><span class="star-icon ${isStarred ? 'active' : ''}" onclick="toggleStar(${item.id})">${isStarred ? '★' : '☆'}</span></td>
+                        <td class="col-star" style="text-align:center;"><span class="star-icon ${isStarred ? 'active' : ''}" data-id="${item.id}" onclick="toggleStar(${item.id})">${isStarred ? '★' : '☆'}</span></td>
                         <td class="col-id">${item.id}</td>
                         <td class="col-term" style="font-weight:bold;">${highlightText(item.term, keywords)}</td>
                         <td class="col-summary">${highlightText(item.summary, keywords)}</td>
@@ -1168,8 +1167,9 @@
                 const tr = document.createElement("tr");
                 const rawInput = document.getElementById("search-master").value.toLowerCase().trim();
                 const keywords = rawInput.split(/[\s　]+/).filter(k => k.length > 0);
+                const isStarred = starredIds.has(item.id);
                 tr.innerHTML = `
-                    <td class="col-star" style="text-align:center;"><span class="star-icon active" onclick="toggleStar(${item.id})">★</span></td>
+                    <td class="col-star" style="text-align:center;"><span class="star-icon ${isStarred ? 'active' : ''}" data-id="${item.id}" onclick="toggleStar(${item.id})">${isStarred ? '★' : '☆'}</span></td>
                     <td class="col-id">${item.id}</td>
                     <td class="col-term" style="font-weight:bold;">${highlightText(item.term, keywords)}</td>
                     <td class="col-summary">${highlightText(item.summary, keywords)}</td>
