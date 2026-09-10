@@ -1128,7 +1128,11 @@
 
             TERMS_DATA.forEach(item => {
                 const fullText = (item.term + ' ' + item.summary + ' ' + item.keywords + ' ' + item.analogy + ' ' + item.details).toLowerCase();
-                const matchSearch = keywords.length === 0 || keywords.every(kw => fullText.includes(kw));
+                const fullTextKata = hiraToKata(fullText);
+                const matchSearch = keywords.length === 0 || keywords.every(kw => {
+                    const kwKata = hiraToKata(kw.toLowerCase());
+                    return fullTextKata.includes(kwKata);
+                });
 
                 if (matchSearch) {
                     const isStarred = starredIds.has(item.id);
@@ -1164,9 +1168,17 @@
             }
 
             reviewedList.forEach(item => {
-                const tr = document.createElement("tr");
+                const fullText = (item.term + ' ' + item.summary + ' ' + item.keywords + ' ' + item.analogy + ' ' + item.details).toLowerCase();
+                const fullTextKata = hiraToKata(fullText);
                 const rawInput = document.getElementById("search-master").value.toLowerCase().trim();
                 const keywords = rawInput.split(/[\s　]+/).filter(k => k.length > 0);
+                const matchSearch = keywords.length === 0 || keywords.every(kw => {
+                    const kwKata = hiraToKata(kw.toLowerCase());
+                    return fullTextKata.includes(kwKata);
+                });
+
+                if (!matchSearch) return;
+                const tr = document.createElement("tr");
                 const isStarred = starredIds.has(item.id);
                 tr.innerHTML = `
                     <td class="col-star" style="text-align:center;"><span class="star-icon ${isStarred ? 'active' : ''}" data-id="${item.id}" onclick="toggleStar(${item.id})">${isStarred ? '★' : '☆'}</span></td>
@@ -1182,6 +1194,17 @@
         }
 
         // 検索ハイライト機能
+        // ひらがな <-> カタカナ 変換
+        function hiraToKata(str) {
+            if (!str) return "";
+            return str.replace(/[\u3041-\u3096]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
+        }
+
+        function kataToHira(str) {
+            if (!str) return "";
+            return str.replace(/[\u30A1-\u30F6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+        }
+
         function escapeRegExp(string) {
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
@@ -1190,17 +1213,32 @@
             if (!text) return "";
             let escaped = escapeHtml(text);
             
-            const validKw = keywords.filter(k => k.length >= 2);
-            if (validKw.length === 0) return escaped;
+            let validPatterns = [];
 
-            const patternStr = validKw
-                .map(k => escapeRegExp(escapeHtml(k)))
-                .filter(k => k.length > 0)
-                .sort((a, b) => b.length - a.length)
-                .join("|");
+            keywords.forEach(kw => {
+                if (!kw) return;
+                
+                // 1文字の「ひらがな」「カタカナ」「英字」はハイライト除外（漢字1文字や数字1文字は許可）
+                const isSingleKanaOrAlpha = /^[\u3041-\u3096\u30A1-\u30F6a-zA-Z\uFF21-\uFF3A\uFF41-\uFF5A]$/.test(kw);
+                if (isSingleKanaOrAlpha) return;
 
-            if (!patternStr) return escaped;
+                // ひらがな・カタカナ両方のパターンを追加（表記揺れハイライト対応）
+                const kwEscaped = escapeRegExp(escapeHtml(kw));
+                const kwKataEscaped = escapeRegExp(escapeHtml(hiraToKata(kw)));
+                const kwHiraEscaped = escapeRegExp(escapeHtml(kataToHira(kw)));
 
+                validPatterns.push(kwEscaped);
+                if (kwKataEscaped !== kwEscaped) validPatterns.push(kwKataEscaped);
+                if (kwHiraEscaped !== kwEscaped) validPatterns.push(kwHiraEscaped);
+            });
+
+            validPatterns = Array.from(new Set(validPatterns))
+                .filter(p => p.length > 0)
+                .sort((a, b) => b.length - a.length);
+
+            if (validPatterns.length === 0) return escaped;
+
+            const patternStr = validPatterns.join("|");
             const regex = new RegExp(`(${patternStr})`, 'gi');
             return escaped.replace(regex, '<mark class="highlight">$1</mark>');
         }
