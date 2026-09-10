@@ -1,50 +1,41 @@
-const CACHE_NAME = 'ap-study-v1';
-const ASSETS = [
+const CACHE_NAME = 'ap-study-app-v2';
+const urlsToCache = [
   './',
   './index.html',
-  './manifest.json'
+  './terms.js',
+  './manifest.json',
+  './icon-192.png',
+  './icon-512.png'
 ];
 
-// インストール時にアプリをスマホ内に保存（キャッシュ）
-self.addEventListener('install', (event) => {
+self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(ASSETS);
-    })
+    caches.open(CACHE_NAME)
+      .then(cache => cache.addAll(urlsToCache))
+      .then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
-// 古いキャッシュの自動削除
-self.addEventListener('activate', (event) => {
+self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then((keys) => {
+    caches.keys().then(cacheNames => {
       return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            return caches.delete(key);
+        cacheNames.map(cache => {
+          if (cache !== CACHE_NAME) {
+
+            return caches.delete(cache);
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// 通信制御：まずスマホ内のキャッシュから即座に画面表示し、裏で最新版を更新
-self.addEventListener('fetch', (event) => {
+self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then((cachedResponse) => {
-      const fetchPromise = fetch(event.request).then((networkResponse) => {
-        if (networkResponse && networkResponse.status === 200) {
-          const cacheCopy = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, cacheCopy));
-        }
-        return networkResponse;
-      }).catch(() => {
-        // オフライン時はそのままキャッシュを維持
-      });
-      return cachedResponse || fetchPromise;
-    })
+    caches.match(event.request)
+      .then(response => {
+        return response || fetch(event.request);
+      })
   );
 });
