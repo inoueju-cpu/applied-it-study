@@ -1,6 +1,9 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1f4e78">
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>応用情報技術者試験 用語マスター Webアプリ</title>
@@ -1243,6 +1246,16 @@
                 updateStarButtonState();
                 alert("★要復習をクリアしました。");
             }
+        }
+    </script>
+
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then(reg => console.log('Service Worker 登録成功:', reg))
+                    .catch(err => console.log('Service Worker 登録失敗:', err));
+            });
         }
     </script>
 </body>
