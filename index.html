@@ -394,12 +394,16 @@
             border-color: var(--secondary);
         }
 
+        /* 検索補足注記メッセージ (1行固定・自動縮小設定) */
         .search-hint {
-            font-size: 0.78rem;
+            font-size: clamp(0.6rem, 2.4vw, 0.78rem);
             color: var(--text-muted);
             margin-bottom: 10px;
             padding-left: 4px;
             font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .table-wrapper {
@@ -437,7 +441,7 @@
             transition: all 0.3s ease;
             overflow: hidden;
             text-overflow: ellipsis;
-            white-space: nowrap; /* 見出しテキストの折り返し防止 */
+            white-space: nowrap;
             font-size: clamp(0.65rem, 2.2vw, 0.82rem);
         }
 
