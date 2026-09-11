@@ -746,7 +746,6 @@
             margin-top: 2px;
         }
 
-        /* トグルスイッチの崩れ防止固定 */
         .switch {
             position: relative;
             display: inline-block;
@@ -1066,7 +1065,7 @@
                         <b>アプリバージョン</b>
                         <div class="setting-desc">用語データおよびシステムの更新状況</div>
                     </div>
-                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 2.1.0 (ノルマカスタマイズ・穴埋め精密化)</span>
+                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 2.2.0 (優先度反映・スイッチ固定)</span>
                 </div>
             </div>
 
@@ -1276,7 +1275,7 @@
             }
         }
 
-        /* --- 🧩 2行要約 ✕ 詳細解説 の【相関穴埋め】抽出アルゴリズム (漢字・多文網羅の強化版) --- */
+        /* --- 🧩 優先順位（キーワード > 「」 > ○○() > 相関 > その他）に基づく【高度穴埋め】抽出アルゴリズム --- */
         function generateSmartClozeText(item, targetType) {
             const textToCloze = targetType === 'summary' ? item.summary : item.details;
             const complementText = targetType === 'summary' ? item.details : item.summary;
@@ -1284,35 +1283,61 @@
             if (!textToCloze) return "";
 
             let wordScores = new Map();
-            // 漢字(2文字以上)、カタカナ(2文字以上)、英数字(2文字以上) を網羅抽出
-            const regexWord = /[\u4E00-\u9FFF]{2,}|[ァ-ヶー]{2,}|[a-zA-Z0-9]{2,}/g;
-            
-            let match;
-            let allExtractedWords = new Set();
-            while ((match = regexWord.exec(textToCloze)) !== null) {
-                allExtractedWords.add(match[0]);
-            }
 
-            // 用語名や逆引きキーワードも候補に確実に追加
-            if (item.term && item.term.length >= 2 && textToCloze.includes(item.term)) {
-                allExtractedWords.add(item.term);
-            }
+            const addWordScore = (word, scoreToAdd) => {
+                if (!word) return;
+                const trimmed = word.trim();
+                if (trimmed.length < 2) return;
+                if (!/[\u4E00-\u9FFFァ-ヶーa-zA-Z0-9]/.test(trimmed)) return;
+
+                const currentScore = wordScores.get(trimmed) || 0;
+                wordScores.set(trimmed, currentScore + scoreToAdd);
+            };
+
+            // 1. 逆引きキーワード（スコア +10）
             if (item.keywords) {
                 item.keywords.split(/[\s,、・]+/).forEach(kw => {
                     if (kw.trim().length >= 2 && textToCloze.includes(kw.trim())) {
-                        allExtractedWords.add(kw.trim());
+                        addWordScore(kw.trim(), 10);
                     }
                 });
             }
 
-            allExtractedWords.forEach(word => {
-                let score = 1;
-                if (complementText && complementText.includes(word)) score += 3;
-                if (item.keywords && item.keywords.includes(word)) score += 2;
-                if (item.term && item.term.includes(word)) score += 2;
+            // 2. 「」や『』の中身（スコア +8）
+            const regexQuote = /[「『]([^」』]+)[」』]/g;
+            let matchQ;
+            while ((matchQ = regexQuote.exec(textToCloze)) !== null) {
+                if (matchQ[1] && textToCloze.includes(matchQ[1])) {
+                    addWordScore(matchQ[1], 8);
+                }
+            }
 
-                wordScores.set(word, score);
-            });
+            // 3. ○○() の直前の○○ か ()の中身（スコア +6）
+            const regexParen = /([\u4E00-\u9FFFァ-ヶーa-zA-Z0-9]{2,})?[（\(]([^）\)]+)[）\)]/g;
+            let matchP;
+            while ((matchP = regexParen.exec(textToCloze)) !== null) {
+                if (matchP[1] && textToCloze.includes(matchP[1])) {
+                    addWordScore(matchP[1], 6);
+                }
+                if (matchP[2] && textToCloze.includes(matchP[2])) {
+                    addWordScore(matchP[2], 6);
+                }
+            }
+
+            // 4. 2行要約と詳細役割の両方に存在する単語（相関スコア +4）＆ 一般語抽出
+            const regexWord = /[\u4E00-\u9FFF]{2,}|[ァ-ヶー]{2,}|[a-zA-Z0-9]{2,}/g;
+            let matchW;
+            while ((matchW = regexWord.exec(textToCloze)) !== null) {
+                const word = matchW[0];
+                let score = 1;
+                if (complementText && complementText.includes(word)) {
+                    score += 4;
+                }
+                if (item.term && item.term.includes(word)) {
+                    score += 2;
+                }
+                addWordScore(word, score);
+            }
 
             let sortedCandidates = Array.from(wordScores.keys()).sort((a, b) => {
                 const scoreDiff = wordScores.get(b) - wordScores.get(a);
@@ -1325,7 +1350,7 @@
             let selectedClozeWords = [];
 
             if (targetType === 'summary') {
-                // 2行要約：各文章（改行・句点・中黒区切り）ごとに最低1つ以上穴を作る
+                // 2行要約：各文章/句点・改行区切りごとに最低1つ以上穴を作る
                 const sentences = textToCloze.split(/[\n。\n]/).filter(s => s.trim().length > 0);
                 
                 sentences.forEach(sentence => {
@@ -1337,7 +1362,6 @@
                             selectedClozeWords.push(bestWord);
                         }
                     } else {
-                        // 候補がない文章でも漢字/カタカナ/英数2文字以上のフォールバック抽出
                         const fallbackMatch = sentence.match(/[\u4E00-\u9FFF]{2,}|[ァ-ヶー]{2,}|[a-zA-Z0-9]{2,}/);
                         if (fallbackMatch && !selectedClozeWords.includes(fallbackMatch[0])) {
                             selectedClozeWords.push(fallbackMatch[0]);
