@@ -993,10 +993,10 @@
         <!-- ================= ⚙️ 設定・データタブ ================= -->
         <div id="tab-settings" class="tab-content">
             <div class="setting-section">
-                <h3>🌗 表示・機能設定</h3>
+                <h3>⚙️ 表示・機能設定</h3>
                 <div class="setting-row">
                     <div>
-                        <b>ダークモード切り替え</b>
+                        <b>🌗 ダークモード切り替え</b>
                         <div class="setting-desc">夜間や暗い場所での学習時に目に優しい配色に変更します</div>
                     </div>
                     <label class="switch">
@@ -1013,13 +1013,20 @@
                 </div>
                 <div class="setting-row" style="border-top: 1px solid var(--border-color); margin-top: 8px; padding-top: 12px;">
                     <div>
-                        <b>正解表示時に自動音声読み上げ</b>
+                        <b>🔊 正解表示時に自動音声読み上げ</b>
                         <div class="setting-desc">暗記カードで正解を開いた際に、自動で「用語 ➔ 要約」を読み上げます</div>
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="auto-speech-toggle" onchange="toggleAutoSpeech()">
                         <span class="slider"></span>
                     </label>
+                </div>
+                <div class="setting-row" style="border-top: 1px solid var(--border-color); margin-top: 8px; padding-top: 12px;">
+                    <div>
+                        <b>🔊 音声読み上げの音量調整</b>
+                        <div class="setting-desc">読み上げ音声の音量を調整します（現在: <span id="volume-val-display">100%</span>）</div>
+                    </div>
+                    <input type="range" id="speech-volume-slider" min="0" max="1" step="0.05" value="1" oninput="updateSpeechVolumeSetting()" style="width: 100px; cursor: pointer;">
                 </div>
             </div>
 
@@ -1065,7 +1072,7 @@
                         <b>アプリバージョン</b>
                         <div class="setting-desc">用語データおよびシステムの更新状況</div>
                     </div>
-                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 2.2.0 (優先度反映・スイッチ固定)</span>
+                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 2.3.0 (音量調整・UI絵文字最適化)</span>
                 </div>
             </div>
 
@@ -1090,6 +1097,7 @@
         const LAST_DATE_KEY = "AP_STUDY_LAST_DATE";
         const TODAY_COUNT_KEY = "AP_STUDY_TODAY_COUNT";
         const QUOTA_STORAGE_KEY = "AP_STUDY_DAILY_QUOTA";
+        const SPEECH_VOLUME_KEY = "AP_STUDY_SPEECH_VOLUME";
 
         let starredIds = new Set(JSON.parse(localStorage.getItem(STAR_STORAGE_KEY) || "[]"));
         let masteredIds = new Set(JSON.parse(localStorage.getItem(MASTER_STORAGE_KEY) || "[]"));
@@ -1100,6 +1108,7 @@
         let lastDate = localStorage.getItem(LAST_DATE_KEY) || "";
         let todayCount = parseInt(localStorage.getItem(TODAY_COUNT_KEY) || "0", 10);
         let dailyTargetQuota = parseInt(localStorage.getItem(QUOTA_STORAGE_KEY) || "10", 10);
+        let speechVolume = parseFloat(localStorage.getItem(SPEECH_VOLUME_KEY) || "1.0");
 
         let currentItem = null;
         let isAnswerVisible = false;
@@ -1129,6 +1138,12 @@
 
             const quotaInput = document.getElementById("daily-quota-input");
             if (quotaInput) quotaInput.value = dailyTargetQuota;
+
+            const volumeSlider = document.getElementById("speech-volume-slider");
+            if (volumeSlider) {
+                volumeSlider.value = speechVolume;
+                updateVolumeDisplay(speechVolume);
+            }
 
             checkStreakAndQuotaDate();
             updateStarBadge();
@@ -1224,6 +1239,21 @@
             input.value = val;
             localStorage.setItem(QUOTA_STORAGE_KEY, val.toString());
             updateStreakDisplay();
+        }
+
+        function updateSpeechVolumeSetting() {
+            const slider = document.getElementById("speech-volume-slider");
+            if (!slider) return;
+            speechVolume = parseFloat(slider.value);
+            localStorage.setItem(SPEECH_VOLUME_KEY, speechVolume.toString());
+            updateVolumeDisplay(speechVolume);
+        }
+
+        function updateVolumeDisplay(val) {
+            const disp = document.getElementById("volume-val-display");
+            if (disp) {
+                disp.innerText = `${Math.round(val * 100)}%`;
+            }
         }
 
         function handleKeyPress(e) {
@@ -1350,7 +1380,6 @@
             let selectedClozeWords = [];
 
             if (targetType === 'summary') {
-                // 2行要約：各文章/句点・改行区切りごとに最低1つ以上穴を作る
                 const sentences = textToCloze.split(/[\n。\n]/).filter(s => s.trim().length > 0);
                 
                 sentences.forEach(sentence => {
@@ -1373,7 +1402,6 @@
                     selectedClozeWords.push(sortedCandidates[0]);
                 }
             } else {
-                // 詳細役割：最低3個以上の穴を作る
                 const minBlanks = Math.min(3, sortedCandidates.length);
                 sortedCandidates.forEach((word, idx) => {
                     if (idx < minBlanks) {
@@ -1411,7 +1439,7 @@
             }
         }
 
-        /* --- 🔊 音声読み上げロジック --- */
+        /* --- 🔊 音声読み上げロジック (音量調整対応) --- */
         function speakText(text, onEndCallback) {
             if (!('speechSynthesis' in window)) {
                 console.warn("お使いのブラウザは音声読み上げに対応していません。");
@@ -1423,6 +1451,7 @@
             uttr.lang = 'ja-JP';
             uttr.rate = 1.0;
             uttr.pitch = 1.0;
+            uttr.volume = speechVolume; // 設定された音量を適用
 
             uttr.onend = () => { if (onEndCallback) onEndCallback(); };
             uttr.onerror = () => { if (onEndCallback) onEndCallback(); };
@@ -2164,6 +2193,7 @@
                 lastDate: lastDate,
                 todayCount: todayCount,
                 dailyTargetQuota: dailyTargetQuota,
+                speechVolume: speechVolume,
                 exportDate: new Date().toISOString()
             };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
@@ -2213,6 +2243,15 @@
                         localStorage.setItem(QUOTA_STORAGE_KEY, dailyTargetQuota.toString());
                         const quotaInput = document.getElementById("daily-quota-input");
                         if (quotaInput) quotaInput.value = dailyTargetQuota;
+                    }
+                    if (typeof imported.speechVolume === "number") {
+                        speechVolume = imported.speechVolume;
+                        localStorage.setItem(SPEECH_VOLUME_KEY, speechVolume.toString());
+                        const volumeSlider = document.getElementById("speech-volume-slider");
+                        if (volumeSlider) {
+                            volumeSlider.value = speechVolume;
+                            updateVolumeDisplay(speechVolume);
+                        }
                     }
 
                     updateStreakDisplay();
