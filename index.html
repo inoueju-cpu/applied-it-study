@@ -294,7 +294,6 @@
             gap: 8px;
         }
 
-        /* ③問題文ラベル ＆ ④正解文タイトルの1行固定設定 */
         #question-label, #ans-title-text {
             white-space: nowrap;
             overflow: hidden;
@@ -382,10 +381,10 @@
         .search-bar {
             width: 100%;
             padding: 12px 15px;
-            font-size: 1rem;
+            font-size: 0.95rem;
             border: 2px solid var(--border-color);
             border-radius: 10px;
-            margin-bottom: 10px;
+            margin-bottom: 4px;
             outline: none;
             background-color: var(--card-bg);
             color: var(--text-main);
@@ -393,6 +392,14 @@
 
         .search-bar:focus {
             border-color: var(--secondary);
+        }
+
+        .search-hint {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            padding-left: 4px;
+            font-weight: 600;
         }
 
         .table-wrapper {
@@ -421,7 +428,7 @@
             position: sticky;
             top: 0;
             z-index: 10;
-            padding: 10px 6px;
+            padding: 8px 4px;
             text-align: left;
             border-bottom: 2px solid var(--primary-dark);
             border-right: 1px solid rgba(255,255,255,0.2);
@@ -430,6 +437,8 @@
             transition: all 0.3s ease;
             overflow: hidden;
             text-overflow: ellipsis;
+            white-space: nowrap; /* 見出しテキストの折り返し防止 */
+            font-size: clamp(0.65rem, 2.2vw, 0.82rem);
         }
 
         th:hover {
@@ -506,11 +515,12 @@
         }
 
         .expand-hint {
-            font-size: 0.7rem;
-            opacity: 0.8;
+            font-size: 0.65rem;
+            opacity: 0.85;
             font-weight: normal;
             display: block;
             margin-top: 2px;
+            white-space: nowrap;
         }
 
         /* --- 復習サブタブ --- */
@@ -739,7 +749,8 @@
 
         <!-- ================= 📚 用語辞書一覧タブ ================= -->
         <div id="tab-master" class="tab-content">
-            <input type="text" id="search-master" class="search-bar" placeholder="🔍 用語・キーワード・解説から検索..." oninput="filterMasterTable()">
+            <input type="text" id="search-master" class="search-bar" placeholder="🔍 用語・キーワード等から検索（スペース区切りで絞り込み）..." oninput="filterMasterTable()">
+            <div class="search-hint">💡 単語をスペースで区切ると、複数条件で絞り込めます（例: 「DB ロック」）</div>
             
             <div class="table-wrapper">
                 <table id="master-table">
@@ -747,11 +758,11 @@
                         <tr>
                             <th class="col-star no-expand" style="text-align: center;">★</th>
                             <th class="col-id no-expand">ID</th>
-                            <th class="col-term" onclick="toggleColumnExpand('master-table', 2)">用語 <span class="expand-hint">🔍 拡大</span></th>
-                            <th class="col-summary" onclick="toggleColumnExpand('master-table', 3)">2行要約メモ <span class="expand-hint">🔍 拡大</span></th>
-                            <th class="col-keywords" onclick="toggleColumnExpand('master-table', 4)">逆引きキーワード <span class="expand-hint">🔍 拡大</span></th>
-                            <th class="col-analogy" onclick="toggleColumnExpand('master-table', 5)">例え話 <span class="expand-hint">🔍 拡大</span></th>
-                            <th class="col-details" onclick="toggleColumnExpand('master-table', 6)">詳細な役割 <span class="expand-hint">🔍 拡大</span></th>
+                            <th class="col-term" onclick="toggleColumnExpand('master-table', 2)">用語 <span class="expand-hint">◀拡大▶</span></th>
+                            <th class="col-summary" onclick="toggleColumnExpand('master-table', 3)">2行要約メモ <span class="expand-hint">◀拡大▶</span></th>
+                            <th class="col-keywords" onclick="toggleColumnExpand('master-table', 4)">逆引きキーワード <span class="expand-hint">◀拡大▶</span></th>
+                            <th class="col-analogy" onclick="toggleColumnExpand('master-table', 5)">例え話 <span class="expand-hint">◀拡大▶</span></th>
+                            <th class="col-details" onclick="toggleColumnExpand('master-table', 6)">詳細な役割 <span class="expand-hint">◀拡大▶</span></th>
                         </tr>
                     </thead>
                     <tbody id="master-table-body">
@@ -774,11 +785,11 @@
                         <tr>
                             <th class="col-star no-expand" style="text-align: center;">★</th>
                             <th class="col-id no-expand">ID</th>
-                            <th class="col-term" onclick="toggleColumnExpand('review-table', 2)">用語 <span class="expand-hint">🔍 拡大</span></th>
-                            <th class="col-summary" onclick="toggleColumnExpand('review-table', 3)">2行要約メモ <span class="expand-hint">🔍 拡大</span></th>
-                            <th class="col-keywords" onclick="toggleColumnExpand('review-table', 4)">逆引きキーワード <span class="expand-hint">🔍 拡大</span></th>
-                            <th class="col-analogy" onclick="toggleColumnExpand('review-table', 5)">例え話 <span class="expand-hint">🔍 拡大</span></th>
-                            <th class="col-details" onclick="toggleColumnExpand('review-table', 6)">詳細な役割 <span class="expand-hint">🔍 拡大</span></th>
+                            <th class="col-term" onclick="toggleColumnExpand('review-table', 2)">用語 <span class="expand-hint">◀拡大▶</span></th>
+                            <th class="col-summary" onclick="toggleColumnExpand('review-table', 3)">2行要約メモ <span class="expand-hint">◀拡大▶</span></th>
+                            <th class="col-keywords" onclick="toggleColumnExpand('review-table', 4)">逆引きキーワード <span class="expand-hint">◀拡大▶</span></th>
+                            <th class="col-analogy" onclick="toggleColumnExpand('review-table', 5)">例え話 <span class="expand-hint">◀拡大▶</span></th>
+                            <th class="col-details" onclick="toggleColumnExpand('review-table', 6)">詳細な役割 <span class="expand-hint">◀拡大▶</span></th>
                         </tr>
                     </thead>
                     <tbody id="review-table-body">
@@ -845,7 +856,7 @@
                         <b>アプリバージョン</b>
                         <div class="setting-desc">用語データおよびシステムの更新状況</div>
                     </div>
-                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 1.6.0</span>
+                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 1.5.0</span>
                 </div>
             </div>
 
@@ -1322,7 +1333,7 @@
             
             const allHints = table.querySelectorAll(".expand-hint");
             allHints.forEach(hint => {
-                hint.innerText = "🔍 拡大";
+                hint.innerText = "◀拡大▶";
             });
 
             if (!isCurrentlyExpanded) {
@@ -1333,7 +1344,7 @@
                 }
                 const targetHint = th.querySelector(".expand-hint");
                 if (targetHint) {
-                    targetHint.innerText = "🔍 縮小";
+                    targetHint.innerText = "▶縮小◀";
                 }
             }
         }
