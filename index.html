@@ -68,7 +68,6 @@
             justify-content: center;
         }
 
-        /* ① タイトルの1行固定＆自動サイズ調整 */
         header h1 {
             font-size: clamp(0.8rem, 3.8vw, 1.2rem);
             font-weight: 700;
@@ -134,7 +133,6 @@
             border: 1px solid var(--border-color);
         }
 
-        /* ② 習得状況見出しの1行固定＆サイズ微調整 */
         .progress-header {
             display: flex;
             justify-content: space-between;
@@ -394,7 +392,6 @@
             border-color: var(--secondary);
         }
 
-        /* 検索補足注記メッセージ (1行固定・自動縮小設定) */
         .search-hint {
             font-size: clamp(0.6rem, 2.4vw, 0.78rem);
             color: var(--text-muted);
@@ -452,7 +449,7 @@
         th.no-expand { cursor: default; }
         th.no-expand:hover { background-color: var(--primary); }
 
-        .col-star { width: 25px; text-align: center; padding: 8px 0; }
+        .col-star { width: 28px; text-align: center; padding: 6px 0; }
         .col-id { width: 28px; text-align: center; padding: 8px 0; }
         .col-term { width: 17%; }
         .col-summary { width: 24%; }
@@ -497,16 +494,47 @@
             box-shadow: inset 0 2px 0 var(--secondary), inset 0 -2px 0 var(--secondary);
         }
 
-        .star-icon {
-            cursor: pointer;
-            font-size: 0.95rem;
-            color: #ccc;
-            user-select: none;
-            text-align: center;
-            transition: transform 0.1s ease;
+        /* 縦3分割ステータスボタン群 (誤タップ防止の余白・パディング拡張) */
+        .status-btn-group {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-around;
+            gap: 12px;
+            padding: 4px 0;
+            min-height: 85px;
         }
 
-        .star-icon.active { color: var(--star-gold); }
+        .status-icon {
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 4px 2px;
+            user-select: none;
+            line-height: 1;
+            transition: transform 0.1s ease, opacity 0.2s ease, filter 0.2s ease;
+            opacity: 0.25;
+            filter: grayscale(100%);
+            display: inline-block;
+        }
+
+        .status-icon:active {
+            transform: scale(1.2);
+        }
+
+        .status-icon.active {
+            opacity: 1;
+            filter: none;
+        }
+
+        .star-icon {
+            opacity: 1;
+            filter: none;
+            color: #ccc;
+        }
+
+        .star-icon.active {
+            color: var(--star-gold);
+        }
 
         .badge-count {
             background-color: var(--star-gold);
@@ -634,7 +662,9 @@
         @media (max-width: 768px) {
             table { font-size: 0.7rem; }
             th, td { padding: 4px 2px; }
-            .col-star { width: 18px; padding: 4px 0; font-size: 0.85rem; }
+            .col-star { width: 24px; padding: 4px 0; }
+            .status-icon { font-size: 0.8rem; padding: 3px 1px; }
+            .status-btn-group { gap: 10px; min-height: 75px; }
             .col-id { width: 22px; padding: 4px 0; font-size: 0.58rem; }
 
             .box-body { font-size: 0.92rem; padding: 10px 4px; min-height: 55px; }
@@ -911,12 +941,14 @@
 
             document.addEventListener("keydown", handleKeyPress);
 
-            // 行タップによるハイライト選択＆外側タップ解除
+            // 行タップによるハイライト選択＆外側タップ解除（ステータスボタン押し分け時は発火防止）
             document.addEventListener("click", (e) => {
                 const tr = e.target.closest("tbody tr");
-                const isStar = e.target.classList.contains("star-icon");
+                const isStatusBtn = e.target.classList.contains("star-icon") || 
+                                    e.target.classList.contains("fuzzy-icon") || 
+                                    e.target.classList.contains("master-icon");
 
-                if (tr && !isStar) {
+                if (tr && !isStatusBtn) {
                     const isAlreadySelected = tr.classList.contains("selected");
                     document.querySelectorAll("tbody tr.selected").forEach(r => r.classList.remove("selected"));
                     if (!isAlreadySelected) {
@@ -1007,7 +1039,7 @@
             if (subMaster) subMaster.innerText = masteredIds.size;
         }
 
-        // 星（★要復習）トグル（復習タブでは即座に行を削除せず、見た目のみ変更する）
+        // 星（★要復習）トグル
         function toggleStar(id) {
             if (starredIds.has(id)) {
                 starredIds.delete(id);
@@ -1021,21 +1053,7 @@
                 updateStarButtonState();
             }
 
-            updateStarIconsInTable(id);
-        }
-
-        function updateStarIconsInTable(id) {
-            const isStarred = starredIds.has(id);
-            const icons = document.querySelectorAll(`.star-icon[data-id="${id}"]`);
-            icons.forEach(icon => {
-                if (isStarred) {
-                    icon.classList.add("active");
-                    icon.innerText = "★";
-                } else {
-                    icon.classList.remove("active");
-                    icon.innerText = "☆";
-                }
-            });
+            updateStatusIconsInTable(id);
         }
 
         function toggleMaster(id) {
@@ -1053,8 +1071,7 @@
                 updateMasterButtonState();
                 updateFuzzyButtonState();
             }
-            renderReviewTable();
-            renderMasterTable();
+            updateStatusIconsInTable(id);
         }
 
         function toggleFuzzy(id) {
@@ -1072,8 +1089,42 @@
                 updateMasterButtonState();
                 updateFuzzyButtonState();
             }
-            renderReviewTable();
-            renderMasterTable();
+            updateStatusIconsInTable(id);
+        }
+
+        function updateStatusIconsInTable(id) {
+            const isStarred = starredIds.has(id);
+            const isFuzzy = fuzzyIds.has(id);
+            const isMastered = masteredIds.has(id);
+
+            const starIcons = document.querySelectorAll(`.star-icon[data-id="${id}"]`);
+            starIcons.forEach(icon => {
+                if (isStarred) {
+                    icon.classList.add("active");
+                    icon.innerText = "★";
+                } else {
+                    icon.classList.remove("active");
+                    icon.innerText = "☆";
+                }
+            });
+
+            const fuzzyIcons = document.querySelectorAll(`.fuzzy-icon[data-id="${id}"]`);
+            fuzzyIcons.forEach(icon => {
+                if (isFuzzy) {
+                    icon.classList.add("active");
+                } else {
+                    icon.classList.remove("active");
+                }
+            });
+
+            const masterIcons = document.querySelectorAll(`.master-icon[data-id="${id}"]`);
+            masterIcons.forEach(icon => {
+                if (isMastered) {
+                    icon.classList.add("active");
+                } else {
+                    icon.classList.remove("active");
+                }
+            });
         }
 
         function toggleCurrentStar() {
@@ -1371,9 +1422,17 @@
 
                 if (matchSearch) {
                     const isStarred = starredIds.has(item.id);
+                    const isFuzzy = fuzzyIds.has(item.id);
+                    const isMastered = masteredIds.has(item.id);
                     const tr = document.createElement("tr");
                     tr.innerHTML = `
-                        <td class="col-star" style="text-align:center;"><span class="star-icon ${isStarred ? 'active' : ''}" data-id="${item.id}" onclick="toggleStar(${item.id})">${isStarred ? '★' : '☆'}</span></td>
+                        <td class="col-star" style="text-align:center;">
+                            <div class="status-btn-group">
+                                <span class="star-icon ${isStarred ? 'active' : ''}" data-id="${item.id}" onclick="toggleStar(${item.id})" title="要復習">${isStarred ? '★' : '☆'}</span>
+                                <span class="status-icon fuzzy-icon ${isFuzzy ? 'active' : ''}" data-id="${item.id}" onclick="toggleFuzzy(${item.id})" title="あいまい">🤔</span>
+                                <span class="status-icon master-icon ${isMastered ? 'active' : ''}" data-id="${item.id}" onclick="toggleMaster(${item.id})" title="覚えた">✅</span>
+                            </div>
+                        </td>
                         <td class="col-id">${item.id}</td>
                         <td class="col-term" style="font-weight:bold;">${highlightText(item.term, keywords)}</td>
                         <td class="col-summary">${highlightText(item.summary, keywords)}</td>
@@ -1433,9 +1492,17 @@
 
             targetList.forEach(item => {
                 const isStarred = starredIds.has(item.id);
+                const isFuzzy = fuzzyIds.has(item.id);
+                const isMastered = masteredIds.has(item.id);
                 const tr = document.createElement("tr");
                 tr.innerHTML = `
-                    <td class="col-star" style="text-align:center;"><span class="star-icon ${isStarred ? 'active' : ''}" data-id="${item.id}" onclick="toggleStar(${item.id})">${isStarred ? '★' : '☆'}</span></td>
+                    <td class="col-star" style="text-align:center;">
+                        <div class="status-btn-group">
+                            <span class="star-icon ${isStarred ? 'active' : ''}" data-id="${item.id}" onclick="toggleStar(${item.id})" title="要復習">${isStarred ? '★' : '☆'}</span>
+                            <span class="status-icon fuzzy-icon ${isFuzzy ? 'active' : ''}" data-id="${item.id}" onclick="toggleFuzzy(${item.id})" title="あいまい">🤔</span>
+                            <span class="status-icon master-icon ${isMastered ? 'active' : ''}" data-id="${item.id}" onclick="toggleMaster(${item.id})" title="覚えた">✅</span>
+                        </div>
+                    </td>
                     <td class="col-id">${item.id}</td>
                     <td class="col-term" style="font-weight:bold;">${highlightText(item.term, keywords)}</td>
                     <td class="col-summary">${highlightText(item.summary, keywords)}</td>
