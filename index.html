@@ -145,30 +145,35 @@
             background-color: var(--border-color);
             border-radius: 6px;
             overflow: hidden;
+            display: flex;
         }
 
         .progress-bar-fill {
             height: 100%;
             width: 0%;
             background: linear-gradient(90deg, #55a630, var(--master-green));
-            border-radius: 6px;
+            transition: width 0.4s ease;
+        }
+
+        .progress-bar-fill-fuzzy {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #ffb703, #fb8500);
             transition: width 0.4s ease;
         }
 
         /* --- カードスタイル --- */
         .card-control-panel {
             background: var(--card-bg);
-            padding: 15px;
+            padding: 12px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             margin-bottom: 20px;
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            grid-template-columns: 1.2fr 0.9fr 0.9fr;
+            gap: 10px;
             border: 1px solid var(--border-color);
         }
-
-        
 
         label {
             font-weight: 700;
@@ -195,24 +200,25 @@
 
         .action-bar {
             display: flex;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 15px;
         }
 
         .btn {
             flex: 1;
-            padding: 12px 10px;
+            padding: 12px 6px;
             border: none;
             border-radius: 10px;
-            font-size: 0.95rem;
+            font-size: 0.88rem;
             font-weight: 700;
             cursor: pointer;
             transition: all 0.2s ease;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
+            gap: 4px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            white-space: nowrap;
         }
 
         .btn:active {
@@ -232,6 +238,17 @@
 
         .btn-master.mastered {
             background-color: var(--master-green);
+            color: white;
+        }
+
+        .btn-fuzzy {
+            background-color: var(--card-bg);
+            color: #d97706;
+            border: 2px solid #f59e0b;
+        }
+
+        .btn-fuzzy.fuzzied {
+            background-color: #f59e0b;
             color: white;
         }
 
@@ -363,22 +380,9 @@
             border-color: var(--secondary);
         }
 
-        .table-instruction {
-            font-size: 0.82rem;
-            color: var(--text-muted);
-            background-color: var(--card-bg);
-            padding: 8px 12px;
-            border-radius: 6px;
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            border: 1px solid var(--border-color);
-        }
-
         .table-wrapper {
             overflow: hidden;
-            max-height: calc(100vh - 180px);
+            max-height: calc(100vh - 220px);
             overflow-y: auto;
             background: var(--card-bg);
             border-radius: 10px;
@@ -458,7 +462,7 @@
 
         .star-icon {
             cursor: pointer;
-            font-size: 1.3rem;
+            font-size: 0.95rem;
             color: #ccc;
             user-select: none;
             text-align: center;
@@ -483,6 +487,33 @@
             font-weight: normal;
             display: block;
             margin-top: 2px;
+        }
+
+        /* --- 復習サブタブ --- */
+        .sub-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .sub-tab-btn {
+            flex: 1;
+            padding: 8px 4px;
+            border: 1px solid var(--border-color);
+            background-color: var(--card-bg);
+            color: var(--text-main);
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+
+        .sub-tab-btn.active {
+            background-color: var(--primary);
+            color: white;
+            border-color: var(--primary);
         }
 
         /* --- 設定・データタブ内デザイン --- */
@@ -552,9 +583,7 @@
         input:checked + .slider { background-color: var(--secondary); }
         input:checked + .slider:before { transform: translateX(24px); }
 
-        .btn-file-input {
-            display: none;
-        }
+        .btn-file-input { display: none; }
 
         mark.highlight {
             background-color: #ffeb3b;
@@ -565,68 +594,25 @@
         }
 
         @media (max-width: 768px) {
-
-            /* スマホ向けテーブル文字サイズ・幅の最適化 */
-            table {
-                font-size: 0.7rem; /* 用語・解説テキスト: 約11pxで潰れを防止 */
-            }
-            th, td {
-                padding: 4px 2px; /* 横余白を限界まで調整 */
-            }
+            table { font-size: 0.7rem; }
+            th, td { padding: 4px 2px; }
             .col-star { width: 18px; padding: 4px 0; font-size: 0.85rem; }
-            .col-id { width: 22px; padding: 4px 0; font-size: 0.58rem; } /* ID列数字のみ約9.2pxに縮小 */
+            .col-id { width: 22px; padding: 4px 0; font-size: 0.58rem; }
 
             header h1 { font-size: 1.1rem; }
-            .box-body { font-size: 1.1rem; }
+            .box-body { font-size: 0.92rem; padding: 10px 4px; min-height: 55px; }
             .tab-btn { font-size: 0.78rem; padding: 10px 2px; }
             th.col-expanded, td.col-expanded { width: 65% !important; }
             
-            /* 1行キープ用レスポンシブ調整 */
             .card-control-panel {
-                grid-template-columns: 1.15fr 0.85fr;
-                padding: 10px;
-                gap: 8px;
-            }
-            label {
-                font-size: 0.78rem;
-                margin-bottom: 2px;
-            }
-            select {
-                padding: 8px 6px;
-                font-size: 0.8rem;
-            }
-            .action-bar {
-                gap: 6px;
-            }
-            .btn {
-                font-size: 0.82rem;
-                padding: 10px 4px;
-                gap: 3px;
-                white-space: nowrap;
-            }
-        }
-
-        @media (max-width: 400px) {
-            .card-control-panel {
-                grid-template-columns: 1.1fr 0.9fr;
-                padding: 8px 6px;
-                gap: 5px;
-            }
-            label {
-                font-size: 0.72rem;
-            }
-            select {
-                padding: 6px 4px;
-                font-size: 0.75rem;
-            }
-            .action-bar {
+                grid-template-columns: 1.2fr 0.9fr 0.9fr;
+                padding: 8px 4px;
                 gap: 4px;
             }
-            .btn {
-                font-size: 0.72rem;
-                padding: 8px 2px;
-                letter-spacing: -0.2px;
-            }
+            label { font-size: 0.78rem; margin-bottom: 2px; }
+            select { padding: 6px 2px; font-size: 0.73rem; }
+            .action-bar { gap: 4px; }
+            .btn { font-size: 0.76rem; padding: 10px 2px; gap: 2px; }
         }
     </style>
 </head>
@@ -640,7 +626,7 @@
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="switchTab('card')">🎯 暗記カード</button>
         <button class="tab-btn" onclick="switchTab('master')">📚 用語マスター</button>
-        <button class="tab-btn" onclick="switchTab('review')">⭐ 要復習 <span id="star-badge" class="badge-count">0</span></button>
+        <button class="tab-btn" onclick="switchTab('review')">🔄 復習 <span id="star-badge" class="badge-count">0</span></button>
         <button class="tab-btn" onclick="switchTab('settings')">⚙️ 設定・データ</button>
     </div>
 
@@ -648,64 +634,68 @@
 
         <!-- ================= 🎯 暗記カードタブ ================= -->
         <div id="tab-card" class="tab-content active">
-            
-            <!-- 📊 習得率プログレスバー -->
             <div class="progress-panel">
                 <div class="progress-header">
-                    <span>📊 習得状況（マスター率）</span>
-                    <span id="progress-text">0.0% (0 / 193 語)</span>
+                    <span>📊 習得状況</span>
+                    <span id="progress-text">覚えた: 0.0% (0) | あいまい: 0.0% (0) / 全0語</span>
                 </div>
                 <div class="progress-bar-bg">
                     <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                    <div id="progress-bar-fill-fuzzy" class="progress-bar-fill-fuzzy"></div>
                 </div>
             </div>
 
-            <!-- コントロールパネル -->
             <div class="card-control-panel">
                 <div>
-                    <label for="mode-select">⚙️ 出題対象選択</label>
-                    <select id="mode-select" onchange="onModeChange()">
-                        <option value="1">1. 🎯 【全件】 用語 ➔ 2行要約</option>
-                        <option value="2">2. 🎯 【全件】 2行要約 ➔ 用語</option>
-                        <option value="3">3. 📖 【未習得のみ】 用語 ➔ 2行要約</option>
-                        <option value="4">4. 📖 【未習得のみ】 2行要約 ➔ 用語</option>
-                        <option value="5">5. ⭐ 【要復習★のみ】 用語 ➔ 2行要約</option>
-                        <option value="6">6. ⭐ 【要復習★のみ】 2行要約 ➔ 用語</option>
+                    <label for="format-select">⚙️ 出題形式</label>
+                    <select id="format-select" onchange="onControlChange()">
+                        <option value="term_summary">1. 用語 ➔ 2行要約</option>
+                        <option value="summary_term">2. 2行要約 ➔ 用語</option>
+                        <option value="details_term">3. 詳細説明 ➔ 用語</option>
+                        <option value="keywords_term">4. 逆引きキーワード ➔ 用語</option>
+                    </select>
+                </div>
+                <div>
+                    <label for="target-select">🎯 出題対象</label>
+                    <select id="target-select" onchange="onControlChange()">
+                        <option value="all">1. 🎯 全件</option>
+                        <option value="weak">2. 🔥 弱点集中 (未習得＋あいまい)</option>
+                        <option value="unmastered">3. 📖 未習得のみ</option>
+                        <option value="fuzzy">4. 🤔 あいまいのみ</option>
+                        <option value="starred">5. ⭐ 要復習のみ</option>
+                        <option value="mastered">6. ✅ 覚えたのみ</option>
                     </select>
                 </div>
                 <div>
                     <label for="order-select">🔢 出題順序</label>
-                    <select id="order-select" onchange="onOrderChange()">
+                    <select id="order-select" onchange="onControlChange()">
                         <option value="random">🎲 ランダム出題</option>
-                        <option value="id-asc">🔢 ID順 (1 ➔ 193)</option>
-                        <option value="id-desc">🔢 ID逆順 (180 ➔ 1)</option>
+                        <option value="id-asc">🔢 ID順 (1 ➔ 末尾)</option>
+                        <option value="id-desc">🔢 ID逆順 (末尾 ➔ 1)</option>
                     </select>
                 </div>
             </div>
 
-            <!-- アクションバー -->
             <div class="action-bar">
                 <button class="btn btn-next" onclick="nextCard()">▶ 次の問題へ</button>
-                <button id="master-toggle-btn" class="btn btn-master" onclick="toggleCurrentMaster()">☑️ 覚えた（習得）</button>
-                <button id="star-toggle-btn" class="btn btn-star" onclick="toggleCurrentStar()">☆ ★要復習に追加</button>
+                <button id="master-toggle-btn" class="btn btn-master" onclick="toggleCurrentMaster()">☑️ 覚えた</button>
+                <button id="fuzzy-toggle-btn" class="btn btn-fuzzy" onclick="toggleCurrentFuzzy()">🤔 あいまい</button>
+                <button id="star-toggle-btn" class="btn btn-star" onclick="toggleCurrentStar()">☆ 要復習</button>
             </div>
 
-            <!-- 問題表示ボックス -->
             <div class="box">
                 <div class="box-title">
-                    <span id="question-label">❓ 問題 (用語)</span>
-                    <span id="card-id-display" style="color: var(--text-muted); font-size: 0.8rem;">ID: -</span>
+                    <span id="question-label">問題 (用語)</span>
                 </div>
                 <div id="question-text" class="box-body">
                     読み込み中...
                 </div>
             </div>
 
-            <!-- 正解・解説ボックス -->
             <div class="box ans-box">
-                <div class="box-title">
+                <div class="box-title" onclick="toggleAnswer()" style="cursor: pointer; user-select: none;">
                     <span id="ans-title-text">💡 正解 & 詳細解説</span>
-                    <button class="btn btn-toggle-ans" onclick="toggleAnswer()" style="padding: 6px 12px; font-size: 0.85rem;">
+                    <button class="btn btn-toggle-ans" style="padding: 6px 12px; font-size: 0.85rem; pointer-events: none;">
                         <span id="ans-btn-icon">👁️</span> <span id="ans-btn-text">正解を表示</span>
                     </button>
                 </div>
@@ -718,51 +708,16 @@
                     <div id="answer-main-text" class="box-body" style="border-bottom: 2px solid #f0e6b5; margin-bottom: 15px;">
                         -
                     </div>
-
-                    <!-- 詳細解説 -->
-                    <div class="details-container">
-                        <div class="detail-item">
-                            <div class="detail-item-title">🔍 逆引きキーワード (午前対策)</div>
-                            <div id="detail-keywords" class="detail-item-content"></div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-item-title">🐟 例を用いたわかりやすい解釈</div>
-                            <div id="detail-analogy" class="detail-item-content"></div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-item-title">📖 詳細な役割</div>
-                            <div id="detail-details" class="detail-item-content"></div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-item-title">🔤 英語の翻訳・語源からの理解</div>
-                            <div id="detail-etymology" class="detail-item-content"></div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-item-title">🎯 試験での頻出・関連箇所</div>
-                            <div id="detail-exam" class="detail-item-content"></div>
-                        </div>
-                        <div class="detail-item">
-                            <div class="detail-item-title">📝 30字定義 (午後対策)</div>
-                            <div id="detail-def30" class="detail-item-content"></div>
-                        </div>
-                        <div class="detail-item" style="border-style: dashed;">
-                            <div class="detail-item-title" style="color: var(--text-muted);">📌 2行要約メモ (確認用)</div>
-                            <div id="detail-summary" class="detail-item-content"></div>
-                        </div>
+                    <div id="details-container" class="details-container">
                     </div>
                 </div>
             </div>
-
         </div>
 
         <!-- ================= 📚 用語マスター一覧タブ ================= -->
         <div id="tab-master" class="tab-content">
             <input type="text" id="search-master" class="search-bar" placeholder="🔍 用語・キーワード・解説からリアルタイム検索..." oninput="filterMasterTable()">
             
-            <div class="table-instruction">
-                💡 <b>タイトルをタップするとその列が画面内でワイド拡大し、他が縮小して改行が激減します！</b>
-            </div>
-
             <div class="table-wrapper">
                 <table id="master-table">
                     <thead>
@@ -782,10 +737,12 @@
             </div>
         </div>
 
-        <!-- ================= ⭐ 要復習一覧タブ ================= -->
+        <!-- ================= 🔄 復習タブ ================= -->
         <div id="tab-review" class="tab-content">
-            <div class="table-instruction">
-                💡 <b>タイトルをタップするとその列が画面内でワイド拡大し、他が縮小して改行が激減します！</b>
+            <div class="sub-tabs">
+                <button id="sub-tab-starred" class="sub-tab-btn active" onclick="switchReviewSubTab('starred')">⭐ 要復習 (<span id="sub-star-count">0</span>)</button>
+                <button id="sub-tab-fuzzy" class="sub-tab-btn" onclick="switchReviewSubTab('fuzzy')">🤔 あいまい (<span id="sub-fuzzy-count">0</span>)</button>
+                <button id="sub-tab-mastered" class="sub-tab-btn" onclick="switchReviewSubTab('mastered')">✅ 覚えた (<span id="sub-mastered-count">0</span>)</button>
             </div>
 
             <div class="table-wrapper">
@@ -809,18 +766,6 @@
 
         <!-- ================= ⚙️ 設定・データタブ ================= -->
         <div id="tab-settings" class="tab-content">
-            
-            <div class="setting-section">
-                <h3>ℹ️ アプリ情報</h3>
-                <div class="setting-row">
-                    <div>
-                        <b>アプリバージョン</b>
-                        <div class="setting-desc">用語データおよびシステムの更新状況</div>
-                    </div>
-                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 1.4.0</span>
-                </div>
-            </div>
-
             <div class="setting-section">
                 <h3>🌗 表示設定</h3>
                 <div class="setting-row">
@@ -836,9 +781,23 @@
             </div>
 
             <div class="setting-section">
+                <h3>⌨️ ショートカット操作案内</h3>
+                <div class="setting-desc">
+                    <p>PCキーボードから以下のキーで爆速学習できます：</p>
+                    <ul style="margin-top: 6px; margin-left: 20px;">
+                        <li><b>Space / Enter</b> : 正解を表示 / 隠す</li>
+                        <li><b>→ (右矢印)</b> : 次の問題へ</li>
+                        <li><b>1</b> : ☑️ 覚えた</li>
+                        <li><b>2</b> : 🤔 あいまい</li>
+                        <li><b>3</b> : ☆ 要復習</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="setting-section">
                 <h3>💾 データのバックアップと復元</h3>
                 <div class="setting-desc" style="margin-bottom: 15px;">
-                    ※スマホの機種変更やPC↔スマホ間でのデータ移行時に「★要復習」や「覚えた学習状態」を引き継ぐことができます。
+                    ※スマホの機種変更やPC↔スマホ間でのデータ移行時に学習状態を引き継ぐことができます。
                 </div>
                 <div style="display: flex; flex-direction: column; gap: 10px;">
                     <button class="btn btn-next" onclick="exportData()">📥 バックアップの保存 (JSON出力)</button>
@@ -849,12 +808,21 @@
 
             <div class="setting-section">
                 <h3>🧹 学習データのリセット</h3>
-                <div class="setting-desc" style="margin-bottom: 15px;">
-                    ※保存されている「★要復習」や「覚えた（習得）」のデータを初期化します。
-                </div>
-                <div style="display: flex; gap: 10px;">
+                <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                     <button class="btn btn-star" onclick="resetMasteredData()" style="color: var(--accent); border-color: var(--accent);">🧹 覚えた状態のみリセット</button>
+                    <button class="btn btn-star" onclick="resetFuzzyData()" style="color: #d97706; border-color: #f59e0b;">🧹 あいまいのみリセット</button>
                     <button class="btn btn-star" onclick="resetStarredData()" style="color: var(--accent); border-color: var(--accent);">🧹 ★要復習のみリセット</button>
+                </div>
+            </div>
+
+            <div class="setting-section">
+                <h3>ℹ️ アプリ情報</h3>
+                <div class="setting-row">
+                    <div>
+                        <b>アプリバージョン</b>
+                        <div class="setting-desc">用語データおよびシステムの更新状況</div>
+                    </div>
+                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 1.5.0</span>
                 </div>
             </div>
 
@@ -863,36 +831,76 @@
     </div>
 
     <script>
-        // 用語マスターデータ
-        // TERMS_DATAは外部ファイル (terms.js) から読み込みます
+        // 用語マスターデータの安全読み込み
+        if (typeof TERMS_DATA === 'undefined') {
+            console.warn("terms.js が読み込めていません。同フォルダ内に terms.js があるか確認してください。");
+            window.TERMS_DATA = [];
+        }
 
-        // ローカルストレージキー
         const STAR_STORAGE_KEY = "AP_STUDY_STARRED_IDS";
         const MASTER_STORAGE_KEY = "AP_STUDY_MASTERED_IDS";
+        const FUZZY_STORAGE_KEY = "AP_STUDY_FUZZY_IDS";
         const DARK_MODE_KEY = "AP_STUDY_DARK_MODE";
 
-        // 状態変数
         let starredIds = new Set(JSON.parse(localStorage.getItem(STAR_STORAGE_KEY) || "[]"));
         let masteredIds = new Set(JSON.parse(localStorage.getItem(MASTER_STORAGE_KEY) || "[]"));
+        let fuzzyIds = new Set(JSON.parse(localStorage.getItem(FUZZY_STORAGE_KEY) || "[]"));
         let currentItem = null;
         let isAnswerVisible = false;
         let currentOrderedIndex = 0;
+        let currentReviewSubTab = "starred";
 
-        // 初期化
+        let shuffledDeck = [];
+        let deckIndex = 0;
+        let lastTargetConfig = "";
+
         document.addEventListener("DOMContentLoaded", () => {
-            // ダークモード初期化
             if (localStorage.getItem(DARK_MODE_KEY) === "true") {
                 document.body.classList.add("dark-mode");
-                document.getElementById("dark-mode-toggle").checked = true;
+                const darkToggle = document.getElementById("dark-mode-toggle");
+                if (darkToggle) darkToggle.checked = true;
             }
 
             updateStarBadge();
             updateProgress();
-            nextCard();
+            if (TERMS_DATA.length > 0) {
+                nextCard();
+            } else {
+                document.getElementById("question-text").innerText = "⚠️ 用語データ(terms.js)を読み込めませんでした。";
+            }
             renderMasterTable();
+            renderReviewTable();
+
+            document.addEventListener("keydown", handleKeyPress);
         });
 
-        // タブ切り替え
+        function handleKeyPress(e) {
+            const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : "";
+            if (activeTag === "input" || activeTag === "textarea" || activeTag === "select") {
+                return;
+            }
+
+            const cardTab = document.getElementById("tab-card");
+            if (!cardTab || !cardTab.classList.contains("active")) return;
+
+            if (e.key === " " || e.key === "Enter") {
+                e.preventDefault();
+                toggleAnswer();
+            } else if (e.key === "ArrowRight") {
+                e.preventDefault();
+                nextCard();
+            } else if (e.key === "1") {
+                e.preventDefault();
+                toggleCurrentMaster();
+            } else if (e.key === "2") {
+                e.preventDefault();
+                toggleCurrentFuzzy();
+            } else if (e.key === "3") {
+                e.preventDefault();
+                toggleCurrentStar();
+            }
+        }
+
         function switchTab(tabName) {
             document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
             document.querySelectorAll(".tab-content").forEach(content => content.classList.remove("active"));
@@ -914,17 +922,38 @@
             }
         }
 
-        // 習得率プログレスバー更新
         function updateProgress() {
             const total = TERMS_DATA.length;
-            const count = masteredIds.size;
-            const percent = total > 0 ? ((count / total) * 100).toFixed(1) : "0.0";
+            const masterCount = masteredIds.size;
+            const fuzzyCount = fuzzyIds.size;
             
-            document.getElementById("progress-text").innerText = `${percent}% (${count} / ${total} 語)`;
-            document.getElementById("progress-bar-fill").style.width = `${percent}%`;
+            const masterPercent = total > 0 ? ((masterCount / total) * 100).toFixed(1) : "0.0";
+            const fuzzyPercent = total > 0 ? ((fuzzyCount / total) * 100).toFixed(1) : "0.0";
+
+            const progressText = document.getElementById("progress-text");
+            if (progressText) {
+                progressText.innerText = `覚えた: ${masterPercent}% (${masterCount}) | あいまい: ${fuzzyPercent}% (${fuzzyCount}) / 全${total}語`;
+            }
+            const barFill = document.getElementById("progress-bar-fill");
+            if (barFill) barFill.style.width = `${masterPercent}%`;
+            const barFillFuzzy = document.getElementById("progress-bar-fill-fuzzy");
+            if (barFillFuzzy) barFillFuzzy.style.width = `${fuzzyPercent}%`;
+
+            updateStarBadge();
         }
 
-        // 星（★要復習）トグル
+        function updateStarBadge() {
+            const badge = document.getElementById("star-badge");
+            if (badge) badge.innerText = starredIds.size;
+            const subStar = document.getElementById("sub-star-count");
+            if (subStar) subStar.innerText = starredIds.size;
+            const subFuzzy = document.getElementById("sub-fuzzy-count");
+            if (subFuzzy) subFuzzy.innerText = fuzzyIds.size;
+            const subMaster = document.getElementById("sub-mastered-count");
+            if (subMaster) subMaster.innerText = masteredIds.size;
+        }
+
+        // 星（★要復習）トグル（復習タブでは即座に行を削除せず、見た目のみ変更する）
         function toggleStar(id) {
             if (starredIds.has(id)) {
                 starredIds.delete(id);
@@ -932,15 +961,12 @@
                 starredIds.add(id);
             }
             localStorage.setItem(STAR_STORAGE_KEY, JSON.stringify(Array.from(starredIds)));
-            updateStarBadge();
             
+            updateStarBadge();
             if (currentItem && currentItem.id === id) {
                 updateStarButtonState();
             }
 
-            renderMasterTable();
-            
-            // 要復習テーブルの行は消さず、星アイコンの表示（★/☆）のみその場でトグル
             updateStarIconsInTable(id);
         }
 
@@ -958,29 +984,54 @@
             });
         }
 
-        function updateStarBadge() {
-            document.getElementById("star-badge").innerText = starredIds.size;
-        }
-
-        // 覚えた（習得）トグル
         function toggleMaster(id) {
             if (masteredIds.has(id)) {
                 masteredIds.delete(id);
             } else {
                 masteredIds.add(id);
+                fuzzyIds.delete(id);
+                localStorage.setItem(FUZZY_STORAGE_KEY, JSON.stringify(Array.from(fuzzyIds)));
             }
             localStorage.setItem(MASTER_STORAGE_KEY, JSON.stringify(Array.from(masteredIds)));
             updateProgress();
             
             if (currentItem && currentItem.id === id) {
                 updateMasterButtonState();
+                updateFuzzyButtonState();
             }
+            renderReviewTable();
+            renderMasterTable();
+        }
+
+        function toggleFuzzy(id) {
+            if (fuzzyIds.has(id)) {
+                fuzzyIds.delete(id);
+            } else {
+                fuzzyIds.add(id);
+                masteredIds.delete(id);
+                localStorage.setItem(MASTER_STORAGE_KEY, JSON.stringify(Array.from(masteredIds)));
+            }
+            localStorage.setItem(FUZZY_STORAGE_KEY, JSON.stringify(Array.from(fuzzyIds)));
+            updateProgress();
+
+            if (currentItem && currentItem.id === id) {
+                updateMasterButtonState();
+                updateFuzzyButtonState();
+            }
+            renderReviewTable();
+            renderMasterTable();
         }
 
         function toggleCurrentStar() {
-            if (currentItem) {
-                toggleStar(currentItem.id);
-            }
+            if (currentItem) toggleStar(currentItem.id);
+        }
+
+        function toggleCurrentMaster() {
+            if (currentItem) toggleMaster(currentItem.id);
+        }
+
+        function toggleCurrentFuzzy() {
+            if (currentItem) toggleFuzzy(currentItem.id);
         }
 
         function updateStarButtonState() {
@@ -988,61 +1039,90 @@
             if (!btn) return;
             if (currentItem && starredIds.has(currentItem.id)) {
                 btn.classList.add("starred");
-                btn.innerHTML = "★ 要復習から外す";
+                btn.innerHTML = "★ 要復習";
             } else {
                 btn.classList.remove("starred");
-                btn.innerHTML = "☆ ★要復習に追加";
-            }
-        }
-
-        function toggleCurrentMaster() {
-            if (currentItem) {
-                toggleMaster(currentItem.id);
+                btn.innerHTML = "☆ 要復習";
             }
         }
 
         function updateMasterButtonState() {
             const btn = document.getElementById("master-toggle-btn");
+            if (!btn) return;
             if (currentItem && masteredIds.has(currentItem.id)) {
                 btn.classList.add("mastered");
                 btn.innerHTML = "✅ 覚えた (習得済)";
             } else {
                 btn.classList.remove("mastered");
-                btn.innerHTML = "☑️ 覚えた (習得)";
+                btn.innerHTML = "☑️ 覚えた";
             }
         }
 
-        // 出題モード・順序の変更
-        function onModeChange() {
+        function updateFuzzyButtonState() {
+            const btn = document.getElementById("fuzzy-toggle-btn");
+            if (!btn) return;
+            if (currentItem && fuzzyIds.has(currentItem.id)) {
+                btn.classList.add("fuzzied");
+                btn.innerHTML = "🤔 あいまい (設定済)";
+            } else {
+                btn.classList.remove("fuzzied");
+                btn.innerHTML = "🤔 あいまい";
+            }
+        }
+
+        function onControlChange() {
             currentOrderedIndex = 0;
+            shuffledDeck = [];
+            deckIndex = 0;
             nextCard();
         }
 
-        function onOrderChange() {
-            currentOrderedIndex = 0;
-            nextCard();
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
         }
 
-        // 出題プール取得
         function getFilteredPool() {
-            const mode = document.getElementById("mode-select").value;
+            const target = document.getElementById("target-select").value;
             let pool = TERMS_DATA;
 
-            // 未習得のみ (3または4)
-            if (mode === "3" || mode === "4") {
+            if (target === "weak") {
                 pool = TERMS_DATA.filter(item => !masteredIds.has(item.id));
                 if (pool.length === 0) {
-                    alert("🎉 全ての用語を修得済みです！出題対象を『全件』に戻します。");
-                    document.getElementById("mode-select").value = "1";
+                    alert("🎉 全ての用語を習得済みです！出題対象を『全件』に戻します。");
+                    document.getElementById("target-select").value = "all";
                     pool = TERMS_DATA;
                 }
-            }
-            // ★のみ (5または6)
-            else if (mode === "5" || mode === "6") {
+            } else if (target === "unmastered") {
+                pool = TERMS_DATA.filter(item => !masteredIds.has(item.id) && !fuzzyIds.has(item.id));
+                if (pool.length === 0) {
+                    alert("🎉 全ての用語を習得済み（またはあいまい設定）です！出題対象を『全件』に戻します。");
+                    document.getElementById("target-select").value = "all";
+                    pool = TERMS_DATA;
+                }
+            } else if (target === "fuzzy") {
+                pool = TERMS_DATA.filter(item => fuzzyIds.has(item.id));
+                if (pool.length === 0) {
+                    alert("🤔 あいまい設定されている用語がありません。出題対象を『全件』に戻します。");
+                    document.getElementById("target-select").value = "all";
+                    pool = TERMS_DATA;
+                }
+            } else if (target === "starred") {
                 pool = TERMS_DATA.filter(item => starredIds.has(item.id));
                 if (pool.length === 0) {
-                    alert("⭐ 要復習（★）がついている用語がありません。マスター一覧等で★をつけてください！");
-                    document.getElementById("mode-select").value = "1";
+                    alert("⭐ 要復習がついている用語がありません。一覧等で★をつけてからお試しください。");
+                    document.getElementById("target-select").value = "all";
+                    pool = TERMS_DATA;
+                }
+            } else if (target === "mastered") {
+                pool = TERMS_DATA.filter(item => masteredIds.has(item.id));
+                if (pool.length === 0) {
+                    alert("✅ 覚えた用語がありません。出題対象を『全件』に戻します。");
+                    document.getElementById("target-select").value = "all";
                     pool = TERMS_DATA;
                 }
             }
@@ -1050,14 +1130,22 @@
             return pool;
         }
 
-        // 次の問題へ
         function nextCard() {
             const pool = getFilteredPool();
+            if (!pool || pool.length === 0) return;
+
             const order = document.getElementById("order-select").value;
+            const format = document.getElementById("format-select").value;
+            const currentConfigKey = `${document.getElementById("target-select").value}_${order}`;
 
             if (order === "random") {
-                const randomIndex = Math.floor(Math.random() * pool.length);
-                currentItem = pool[randomIndex];
+                if (lastTargetConfig !== currentConfigKey || deckIndex >= shuffledDeck.length || shuffledDeck.length === 0) {
+                    shuffledDeck = shuffleArray(pool);
+                    deckIndex = 0;
+                    lastTargetConfig = currentConfigKey;
+                }
+                currentItem = shuffledDeck[deckIndex];
+                deckIndex++;
             } else if (order === "id-asc") {
                 const sortedPool = [...pool].sort((a, b) => a.id - b.id);
                 if (currentOrderedIndex >= sortedPool.length) currentOrderedIndex = 0;
@@ -1070,42 +1158,90 @@
                 currentOrderedIndex++;
             }
 
-            document.getElementById("card-id-display").innerText = `ID: ${currentItem.id} / 全${TERMS_DATA.length}件`;
-            
-            const mode = document.getElementById("mode-select").value;
             const qLabel = document.getElementById("question-label");
             const qText = document.getElementById("question-text");
+            const ansMainText = document.getElementById("answer-main-text");
             const ansTitle = document.getElementById("ans-title-text");
             const ansMask = document.getElementById("answer-mask");
 
-            if (mode === "1" || mode === "3" || mode === "5") {
-                qLabel.innerText = "❓ この用語の意味・要約を考えてください";
+            if (format === "term_summary") {
+                qLabel.innerText = "この用語の意味・要約を考えてください";
                 qText.innerText = currentItem.term;
-                document.getElementById("answer-main-text").innerText = currentItem.summary;
+                ansMainText.innerText = currentItem.summary;
                 ansTitle.innerText = "💡 正解（2行要約メモ）& 詳細解説";
                 ansMask.innerText = "🙈 タップ / クリックで正解（2行要約）と詳細解説を表示します";
-            } else {
-                qLabel.innerText = "❓ この説明が表す用語は何ですか？";
+            } else if (format === "summary_term") {
+                qLabel.innerText = "この2行要約が表す用語は何ですか？";
                 qText.innerText = currentItem.summary;
-                document.getElementById("answer-main-text").innerText = currentItem.term;
+                ansMainText.innerText = currentItem.term;
+                ansTitle.innerText = "💡 正解（用語）& 詳細解説";
+                ansMask.innerText = "🙈 タップ / クリックで正解（用語）と詳細解説を表示します";
+            } else if (format === "details_term") {
+                qLabel.innerText = "この詳細説明が表す用語は何ですか？";
+                qText.innerText = currentItem.details;
+                ansMainText.innerText = currentItem.term;
+                ansTitle.innerText = "💡 正解（用語）& 詳細解説";
+                ansMask.innerText = "🙈 タップ / クリックで正解（用語）と詳細解説を表示します";
+            } else if (format === "keywords_term") {
+                qLabel.innerText = "このキーワード群が表す用語は何ですか？";
+                qText.innerText = currentItem.keywords;
+                ansMainText.innerText = currentItem.term;
                 ansTitle.innerText = "💡 正解（用語）& 詳細解説";
                 ansMask.innerText = "🙈 タップ / クリックで正解（用語）と詳細解説を表示します";
             }
 
-            document.getElementById("detail-summary").innerText = currentItem.summary;
-            document.getElementById("detail-keywords").innerText = currentItem.keywords;
-            document.getElementById("detail-analogy").innerText = currentItem.analogy;
-            document.getElementById("detail-details").innerText = currentItem.details;
-            document.getElementById("detail-etymology").innerText = currentItem.etymology;
-            document.getElementById("detail-exam").innerText = currentItem.exam;
-            document.getElementById("detail-def30").innerText = currentItem.def30;
+            renderDetailsContainer(format, currentItem);
 
             hideAnswer();
             updateStarButtonState();
             updateMasterButtonState();
+            updateFuzzyButtonState();
         }
 
-        // 解答表示トグル
+        function renderDetailsContainer(format, item) {
+            const detailsContainer = document.getElementById("details-container");
+            if (!detailsContainer) return;
+
+            const allDetailItems = [
+                { key: "keywords", title: "🔍 逆引きキーワード (午前対策)", text: item.keywords },
+                { key: "analogy", title: "🐟 例を用いたわかりやすい解釈", text: item.analogy },
+                { key: "details", title: "📖 詳細な役割", text: item.details },
+                { key: "etymology", title: "🔤 英語の翻訳・語源からの理解", text: item.etymology },
+                { key: "exam", title: "🎯 試験での頻出・関連箇所", text: item.exam },
+                { key: "def30", title: "📝 30字定義 (午後対策)", text: item.def30 },
+                { key: "summary", title: "📌 2行要約メモ", text: item.summary }
+            ];
+
+            let bottomKey = "summary";
+            if (format === "details_term") {
+                bottomKey = "details";
+            } else if (format === "keywords_term") {
+                bottomKey = "keywords";
+            }
+
+            const mainItems = allDetailItems.filter(d => d.key !== bottomKey);
+            const bottomItem = allDetailItems.find(d => d.key === bottomKey);
+
+            let html = "";
+            mainItems.forEach(d => {
+                html += `
+                    <div class="detail-item">
+                        <div class="detail-item-title">${d.title}</div>
+                        <div class="detail-item-content">${escapeHtml(d.text)}</div>
+                    </div>`;
+            });
+
+            if (bottomItem) {
+                html += `
+                    <div class="detail-item" style="border-style: dashed;">
+                        <div class="detail-item-title" style="color: var(--text-muted);">${bottomItem.title} (確認用)</div>
+                        <div class="detail-item-content">${escapeHtml(bottomItem.text)}</div>
+                    </div>`;
+            }
+
+            detailsContainer.innerHTML = html;
+        }
+
         function toggleAnswer() {
             if (isAnswerVisible) {
                 hideAnswer();
@@ -1127,15 +1263,9 @@
             document.getElementById("answer-mask").style.display = "block";
             document.getElementById("answer-content").style.display = "none";
             document.getElementById("ans-btn-icon").innerText = "👁️";
-            const mode = document.getElementById("mode-select").value;
-            if (mode === "1" || mode === "3" || mode === "5") {
-                document.getElementById("ans-btn-text").innerText = "正解（要約）を表示";
-            } else {
-                document.getElementById("ans-btn-text").innerText = "正解（用語）を表示";
-            }
+            document.getElementById("ans-btn-text").innerText = "正解を表示";
         }
 
-        // 列幅拡大トグル機能
         function toggleColumnExpand(tableId, colIndex) {
             const table = document.getElementById(tableId);
             if (!table) return;
@@ -1150,6 +1280,11 @@
                     cells[c].classList.remove("col-expanded");
                 }
             }
+            
+            const allHints = table.querySelectorAll(".expand-hint");
+            allHints.forEach(hint => {
+                hint.innerText = "🔍 拡大";
+            });
 
             if (!isCurrentlyExpanded) {
                 for (let r = 0; r < rows.length; r++) {
@@ -1157,14 +1292,19 @@
                         rows[r].cells[colIndex].classList.add("col-expanded");
                     }
                 }
+                const targetHint = th.querySelector(".expand-hint");
+                if (targetHint) {
+                    targetHint.innerText = "✖ 縮小";
+                }
             }
         }
 
-        // マスターテーブル描画
         function renderMasterTable() {
             const tbody = document.getElementById("master-table-body");
-            const rawInput = document.getElementById("search-master").value.toLowerCase().trim();
-            const keywords = rawInput.split(/[\s　]+/).filter(k => k.length > 0);
+            if (!tbody) return;
+            const searchInput = document.getElementById("search-master");
+            const rawInput = searchInput ? searchInput.value.toLowerCase().trim() : "";
+            const keywords = rawInput.split(/[\s ]+/).filter(k => k.length > 0);
             tbody.innerHTML = "";
 
             TERMS_DATA.forEach(item => {
@@ -1196,31 +1336,50 @@
             renderMasterTable();
         }
 
-        // 要復習テーブル描画
+        function switchReviewSubTab(subTabName) {
+            currentReviewSubTab = subTabName;
+            document.querySelectorAll(".sub-tab-btn").forEach(btn => btn.classList.remove("active"));
+            if (subTabName === 'starred') {
+                document.getElementById("sub-tab-starred").classList.add("active");
+            } else if (subTabName === 'fuzzy') {
+                document.getElementById("sub-tab-fuzzy").classList.add("active");
+            } else if (subTabName === 'mastered') {
+                document.getElementById("sub-tab-mastered").classList.add("active");
+            }
+            renderReviewTable();
+        }
+
         function renderReviewTable() {
             const tbody = document.getElementById("review-table-body");
+            if (!tbody) return;
             tbody.innerHTML = "";
 
-            const reviewedList = TERMS_DATA.filter(item => starredIds.has(item.id));
+            let targetList = [];
+            let emptyMessage = "";
 
-            if (reviewedList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 30px; color: var(--text-muted);">⭐ 現在、要復習（★）がついている用語はありません。</td></tr>`;
+            if (currentReviewSubTab === "starred") {
+                targetList = TERMS_DATA.filter(item => starredIds.has(item.id));
+                emptyMessage = "⭐ 現在、要復習（★）がついている用語はありません。";
+            } else if (currentReviewSubTab === "fuzzy") {
+                targetList = TERMS_DATA.filter(item => fuzzyIds.has(item.id));
+                emptyMessage = "🤔 現在、あいまい（🤔）に設定されている用語はありません。";
+            } else if (currentReviewSubTab === "mastered") {
+                targetList = TERMS_DATA.filter(item => masteredIds.has(item.id));
+                emptyMessage = "✅ 現在、覚えた（✅）に設定されている用語はありません。";
+            }
+
+            if (targetList.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 30px; color: var(--text-muted);">${emptyMessage}</td></tr>`;
                 return;
             }
 
-            reviewedList.forEach(item => {
-                const fullText = (item.term + ' ' + item.summary + ' ' + item.keywords + ' ' + item.analogy + ' ' + item.details).toLowerCase();
-                const fullTextKata = hiraToKata(fullText);
-                const rawInput = document.getElementById("search-master").value.toLowerCase().trim();
-                const keywords = rawInput.split(/[\s　]+/).filter(k => k.length > 0);
-                const matchSearch = keywords.length === 0 || keywords.every(kw => {
-                    const kwKata = hiraToKata(kw.toLowerCase());
-                    return fullTextKata.includes(kwKata);
-                });
+            const searchInput = document.getElementById("search-master");
+            const rawInput = searchInput ? searchInput.value.toLowerCase().trim() : "";
+            const keywords = rawInput.split(/[\s ]+/).filter(k => k.length > 0);
 
-                if (!matchSearch) return;
-                const tr = document.createElement("tr");
+            targetList.forEach(item => {
                 const isStarred = starredIds.has(item.id);
+                const tr = document.createElement("tr");
                 tr.innerHTML = `
                     <td class="col-star" style="text-align:center;"><span class="star-icon ${isStarred ? 'active' : ''}" data-id="${item.id}" onclick="toggleStar(${item.id})">${isStarred ? '★' : '☆'}</span></td>
                     <td class="col-id">${item.id}</td>
@@ -1234,18 +1393,17 @@
             });
         }
 
-        // 検索ハイライト機能
-        // ひらがな <-> カタカナ 変換
         function hiraToKata(str) {
             if (!str) return "";
-            return str.replace(/[\u3041-\u3096]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
+            return str.replace(/[ぁ-ゖ]/g, ch => String.fromCharCode(ch.charCodeAt(0) + 0x60));
         }
 
         function kataToHira(str) {
             if (!str) return "";
-            return str.replace(/[\u30A1-\u30F6]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
+            return str.replace(/[ァ-ヶ]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
         }
 
+        // 正規表現用のエスケープ関数 (修正済み)
         function escapeRegExp(string) {
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
@@ -1253,17 +1411,13 @@
         function highlightText(text, keywords) {
             if (!text) return "";
             let escaped = escapeHtml(text);
-            
             let validPatterns = [];
 
             keywords.forEach(kw => {
                 if (!kw) return;
-                
-                // 1文字の「ひらがな」「カタカナ」「英字」はハイライト除外（漢字1文字や数字1文字は許可）
-                const isSingleKanaOrAlpha = /^[\u3041-\u3096\u30A1-\u30F6a-zA-Z\uFF21-\uFF3A\uFF41-\uFF5A]$/.test(kw);
+                const isSingleKanaOrAlpha = /^[ぁ-ゖァ-ヶa-zA-ZＡ-Ｚａ-ｚ]$/.test(kw);
                 if (isSingleKanaOrAlpha) return;
 
-                // ひらがな・カタカナ両方のパターンを追加（表記揺れハイライト対応）
                 const kwEscaped = escapeRegExp(escapeHtml(kw));
                 const kwKataEscaped = escapeRegExp(escapeHtml(hiraToKata(kw)));
                 const kwHiraEscaped = escapeRegExp(escapeHtml(kataToHira(kw)));
@@ -1289,7 +1443,6 @@
             return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&#039;");
         }
 
-        // --- ⚙️ 設定機能 ---
         function toggleDarkMode() {
             const isDark = document.getElementById("dark-mode-toggle").checked;
             if (isDark) {
@@ -1301,11 +1454,11 @@
             }
         }
 
-        // JSON エクスポート
         function exportData() {
             const exportObj = {
                 starred: Array.from(starredIds),
                 mastered: Array.from(masteredIds),
+                fuzzy: Array.from(fuzzyIds),
                 exportDate: new Date().toISOString()
             };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
@@ -1318,7 +1471,6 @@
             downloadAnchor.remove();
         }
 
-        // JSON インポート
         function importData(event) {
             const file = event.target.files[0];
             if (!file) return;
@@ -1335,12 +1487,16 @@
                         masteredIds = new Set(imported.mastered);
                         localStorage.setItem(MASTER_STORAGE_KEY, JSON.stringify(Array.from(masteredIds)));
                     }
-                    updateStarBadge();
+                    if (Array.isArray(imported.fuzzy)) {
+                        fuzzyIds = new Set(imported.fuzzy);
+                        localStorage.setItem(FUZZY_STORAGE_KEY, JSON.stringify(Array.from(fuzzyIds)));
+                    }
                     updateProgress();
                     renderMasterTable();
                     renderReviewTable();
                     updateStarButtonState();
                     updateMasterButtonState();
+                    updateFuzzyButtonState();
                     alert("✅ データの復元（インポート）が正常に完了しました！");
                 } catch (err) {
                     alert("❌ ファイルの読み込みに失敗しました。正しくバックアップされたJSONファイルかご確認ください。");
@@ -1349,14 +1505,25 @@
             reader.readAsText(file);
         }
 
-        // データ初期化
         function resetMasteredData() {
             if (confirm("⚠️ 「覚えた（習得）」の記録をすべてクリアしますか？")) {
                 masteredIds.clear();
                 localStorage.setItem(MASTER_STORAGE_KEY, "[]");
                 updateProgress();
                 updateMasterButtonState();
+                renderReviewTable();
                 alert("覚えた状態をクリアしました。");
+            }
+        }
+
+        function resetFuzzyData() {
+            if (confirm("⚠️ 「あいまい（🤔）」の記録をすべてクリアしますか？")) {
+                fuzzyIds.clear();
+                localStorage.setItem(FUZZY_STORAGE_KEY, "[]");
+                updateProgress();
+                updateFuzzyButtonState();
+                renderReviewTable();
+                alert("あいまいの記録をクリアしました。");
             }
         }
 
@@ -1364,9 +1531,9 @@
             if (confirm("⚠️ 「★要復習」の記録をすべてクリアしますか？")) {
                 starredIds.clear();
                 localStorage.setItem(STAR_STORAGE_KEY, "[]");
-                updateStarBadge();
-                renderReviewTable();
+                updateProgress();
                 updateStarButtonState();
+                renderReviewTable();
                 alert("★要復習をクリアしました。");
             }
         }
