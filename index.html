@@ -68,7 +68,6 @@
             justify-content: center;
         }
 
-        /* ① タイトルの1行固定＆自動サイズ調整 */
         header h1 {
             font-size: clamp(0.8rem, 3.8vw, 1.2rem);
             font-weight: 700;
@@ -134,7 +133,6 @@
             border: 1px solid var(--border-color);
         }
 
-        /* ② 習得状況見出しの1行固定＆サイズ微調整 */
         .progress-header {
             display: flex;
             justify-content: space-between;
@@ -294,7 +292,6 @@
             gap: 8px;
         }
 
-        /* ③問題文ラベル ＆ ④正解文タイトルの1行固定設定 */
         #question-label, #ans-title-text {
             white-space: nowrap;
             overflow: hidden;
@@ -639,7 +636,7 @@
 
     <div class="nav-tabs">
         <button class="tab-btn active" onclick="switchTab('card')">🎯 暗記カード</button>
-        <button class="tab-btn" onclick="switchTab('master')">📚 用語マスター</button>
+        <button class="tab-btn" onclick="switchTab('master')">📚 用語辞書</button>
         <button class="tab-btn" onclick="switchTab('review')">🔄 復習 <span id="star-badge" class="badge-count">0</span></button>
         <button class="tab-btn" onclick="switchTab('settings')">⚙️ 設定・データ</button>
     </div>
@@ -728,9 +725,9 @@
             </div>
         </div>
 
-        <!-- ================= 📚 用語マスター一覧タブ ================= -->
+        <!-- ================= 📚 用語辞書一覧タブ ================= -->
         <div id="tab-master" class="tab-content">
-            <input type="text" id="search-master" class="search-bar" placeholder="🔍 用語・キーワード・解説からリアルタイム検索..." oninput="filterMasterTable()">
+            <input type="text" id="search-master" class="search-bar" placeholder="🔍 用語・キーワード・解説から検索..." oninput="filterMasterTable()">
             
             <div class="table-wrapper">
                 <table id="master-table">
@@ -797,7 +794,7 @@
             <div class="setting-section">
                 <h3>⌨️ ショートカット操作案内</h3>
                 <div class="setting-desc">
-                    <p>PCキーボードから以下のキーで爆速学習できます：</p>
+                    <p>PCキーボードから以下のキーで学習できます：</p>
                     <ul style="margin-top: 6px; margin-left: 20px;">
                         <li><b>Space / Enter</b> : 正解を表示 / 隠す</li>
                         <li><b>→ (右矢印)</b> : 次の問題へ</li>
@@ -1308,7 +1305,7 @@
                 }
                 const targetHint = th.querySelector(".expand-hint");
                 if (targetHint) {
-                    targetHint.innerText = "✖ 縮小";
+                    targetHint.innerText = "🔍 縮小";
                 }
             }
         }
