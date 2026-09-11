@@ -123,7 +123,7 @@
             display: block;
         }
 
-        /* --- 習得率プログレスバー --- */
+        /* --- 習得率プログレスバー ＆ ストリークパネル --- */
         .progress-panel {
             background: var(--card-bg);
             padding: 14px 18px;
@@ -131,6 +131,24 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             margin-bottom: 15px;
             border: 1px solid var(--border-color);
+        }
+
+        .streak-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--expand-bg);
+            padding: 8px 12px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-size: clamp(0.72rem, 2.6vw, 0.88rem);
+            font-weight: 700;
+            color: var(--primary);
+            border: 1px dashed var(--secondary);
+        }
+
+        body.dark-mode .streak-container {
+            color: #81a1c1;
         }
 
         .progress-header {
@@ -167,41 +185,56 @@
             transition: width 0.4s ease;
         }
 
-        /* --- カードスタイル --- */
+        /* --- カードスタイル (常時1列固定) --- */
         .card-control-panel {
             background: var(--card-bg);
-            padding: 12px;
+            padding: 12px 8px;
             border-radius: 12px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.06);
             margin-bottom: 20px;
             display: grid;
             grid-template-columns: 1.2fr 0.9fr 0.9fr;
-            gap: 10px;
+            gap: 6px;
             border: 1px solid var(--border-color);
+        }
+
+        .card-control-panel > div {
+            min-width: 0;
         }
 
         label {
             font-weight: 700;
-            font-size: 0.85rem;
+            font-size: clamp(0.7rem, 2.2vw, 0.85rem);
             color: var(--primary-dark);
             margin-bottom: 4px;
             display: block;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         body.dark-mode label { color: #81a1c1; }
 
         select {
-            padding: 10px 12px;
+            padding: 8px 4px;
             border-radius: 8px;
             border: 1.5px solid var(--border-color);
-            font-size: 0.9rem;
+            font-size: clamp(0.65rem, 2.2vw, 0.85rem);
             font-weight: 600;
             background-color: var(--card-bg);
             color: var(--text-main);
             outline: none;
             width: 100%;
             cursor: pointer;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
+
+        optgroup {
+            font-weight: bold;
+            color: var(--primary);
+        }
+        body.dark-mode optgroup { color: #81a1c1; }
 
         .action-bar {
             display: flex;
@@ -307,8 +340,39 @@
             padding: 15px 5px;
             min-height: 80px;
             display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
+        }
+
+        /* 穴埋め用のインタラクティブ空欄デザイン */
+        .cloze-blank {
+            display: inline-block;
+            min-width: 3.5em;
+            padding: 2px 10px;
+            background-color: var(--secondary);
+            color: white;
+            border-radius: 6px;
+            margin: 0 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 0.92em;
+            user-select: none;
+            transition: all 0.2s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.15);
+            text-align: center;
+        }
+        
+        .cloze-blank:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .cloze-blank.revealed {
+            background-color: #ffeb3b;
+            color: #111;
+            border: 1.5px solid #d97706;
+            box-shadow: none;
         }
 
         .ans-box {
@@ -481,20 +545,26 @@
             color: var(--text-main);
         }
 
-        /* PCのマウス操作時のみホバーハイライトを有効化 */
         @media (hover: hover) {
             tr:hover td {
                 background-color: var(--expand-bg);
             }
         }
 
-        /* スマホ・PC共通：タップ（クリック）で選択された行のハイライト */
         tr.selected td {
             background-color: var(--expand-bg) !important;
             box-shadow: inset 0 2px 0 var(--secondary), inset 0 -2px 0 var(--secondary);
         }
 
-        /* 縦3分割ステータスボタン群 (誤タップ防止の余白・パディング拡張) */
+        tr.reading-row td {
+            background-color: #fff3cd !important;
+            box-shadow: inset 0 2px 0 #ffb703, inset 0 -2px 0 #ffb703;
+        }
+
+        body.dark-mode tr.reading-row td {
+            background-color: #4a3b00 !important;
+        }
+
         .status-btn-group {
             display: flex;
             flex-direction: column;
@@ -555,7 +625,7 @@
             white-space: nowrap;
         }
 
-        /* --- 復習サブタブ --- */
+        /* --- 復習サブタブ & 音声コントロール --- */
         .sub-tabs {
             display: flex;
             gap: 8px;
@@ -580,6 +650,66 @@
             background-color: var(--primary);
             color: white;
             border-color: var(--primary);
+        }
+
+        .audio-player-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 10px 14px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .audio-player-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        body.dark-mode .audio-player-title { color: #81a1c1; }
+
+        .audio-controls {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .audio-btn {
+            padding: 6px 12px;
+            font-size: 0.78rem;
+            font-weight: 700;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .audio-btn-play {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
+        .audio-btn-play.playing {
+            background: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .audio-btn-loop.active {
+            background: var(--secondary);
+            color: white;
+            border-color: var(--secondary);
         }
 
         /* --- 設定・データタブ内デザイン --- */
@@ -607,6 +737,7 @@
             align-items: center;
             justify-content: space-between;
             padding: 10px 0;
+            gap: 12px;
         }
 
         .setting-desc {
@@ -615,12 +746,13 @@
             margin-top: 2px;
         }
 
-        /* トグルスイッチ */
+        /* トグルスイッチの崩れ防止固定 */
         .switch {
             position: relative;
             display: inline-block;
             width: 50px;
             height: 26px;
+            flex-shrink: 0;
         }
 
         .switch input { opacity: 0; width: 0; height: 0; }
@@ -670,14 +802,14 @@
             .box-body { font-size: 0.92rem; padding: 10px 4px; min-height: 55px; }
             .tab-btn { font-size: 0.78rem; padding: 10px 2px; }
             th.col-expanded, td.col-expanded { width: 65% !important; }
-            
+
             .card-control-panel {
                 grid-template-columns: 1.2fr 0.9fr 0.9fr;
                 padding: 8px 4px;
                 gap: 4px;
             }
-            label { font-size: 0.78rem; margin-bottom: 2px; }
-            select { padding: 6px 2px; font-size: 0.73rem; }
+            label { font-size: 0.72rem; margin-bottom: 2px; }
+            select { padding: 6px 2px; font-size: 0.72rem; }
             .action-bar { gap: 4px; }
             .btn { font-size: 0.76rem; padding: 10px 2px; gap: 2px; }
         }
@@ -702,6 +834,12 @@
         <!-- ================= 🎯 暗記カードタブ ================= -->
         <div id="tab-card" class="tab-content active">
             <div class="progress-panel">
+                <!-- 🔥 ストリーク ＆ 🎯 ノルマ表示エリア -->
+                <div class="streak-container">
+                    <span>🔥 連続学習: <span id="streak-days-text">0日目</span></span>
+                    <span>🎯 今日の目標: <span id="today-quota-text">0 / 10語</span></span>
+                </div>
+
                 <div class="progress-header">
                     <span>📊 習得状況</span>
                     <span id="progress-text">覚えた: 0.0% (0) | あいまい: 0.0% (0) / 全0語</span>
@@ -716,10 +854,16 @@
                 <div>
                     <label for="format-select">⚙️ 出題形式</label>
                     <select id="format-select" onchange="onControlChange()">
-                        <option value="term_summary">1. 用語 ➔ 2行要約</option>
-                        <option value="summary_term">2. 2行要約 ➔ 用語</option>
-                        <option value="details_term">3. 詳細説明 ➔ 用語</option>
-                        <option value="keywords_term">4. 逆引きキーワード ➔ 用語</option>
+                        <optgroup label="通常モード">
+                            <option value="term_summary">1. 用語 ➔ 2行要約</option>
+                            <option value="summary_term">2. 2行要約 ➔ 用語</option>
+                            <option value="details_term">3. 詳細説明 ➔ 用語</option>
+                            <option value="keywords_term">4. 逆引きキーワード ➔ 用語</option>
+                        </optgroup>
+                        <optgroup label="🧩 穴埋め特訓モード (容易版)">
+                            <option value="term_summary_blank">5. 用語 ➔ 要約 [穴埋め]</option>
+                            <option value="term_details_blank">6. 用語 ➔ 詳細役割 [穴埋め]</option>
+                        </optgroup>
                     </select>
                 </div>
                 <div>
@@ -744,7 +888,7 @@
             </div>
 
             <div class="action-bar">
-                <button class="btn btn-next" onclick="nextCard()">▶ 次の問題へ</button>
+                <button class="btn btn-next" onclick="nextCard(true)">▶ 次の問題へ</button>
                 <button id="master-toggle-btn" class="btn btn-master" onclick="toggleCurrentMaster()">☑️ 覚えた</button>
                 <button id="fuzzy-toggle-btn" class="btn btn-fuzzy" onclick="toggleCurrentFuzzy()">🤔 あいまい</button>
                 <button id="star-toggle-btn" class="btn btn-star" onclick="toggleCurrentStar()">☆ 要復習</button>
@@ -753,6 +897,7 @@
             <div class="box">
                 <div class="box-title">
                     <span id="question-label">問題 (用語)</span>
+                    <button class="audio-btn" onclick="speakCurrentTermOnly()" style="padding: 2px 8px; font-size: 0.75rem;">🔊 読み上げ</button>
                 </div>
                 <div id="question-text" class="box-body">
                     読み込み中...
@@ -762,9 +907,12 @@
             <div class="box ans-box">
                 <div class="box-title" onclick="toggleAnswer()" style="cursor: pointer; user-select: none;">
                     <span id="ans-title-text">💡 正解 & 詳細解説</span>
-                    <button class="btn btn-toggle-ans" style="padding: 6px 12px; font-size: 0.85rem; pointer-events: none;">
-                        <span id="ans-btn-icon">👁️</span> <span id="ans-btn-text">正解を表示</span>
-                    </button>
+                    <div style="display: flex; gap: 4px; align-items: center;">
+                        <button class="audio-btn" onclick="event.stopPropagation(); playCurrentCardSpeech()" style="padding: 2px 8px; font-size: 0.75rem;">🔊 全文読み上げ</button>
+                        <button class="btn btn-toggle-ans" style="padding: 6px 12px; font-size: 0.85rem; pointer-events: none;">
+                            <span id="ans-btn-icon">👁️</span> <span id="ans-btn-text">正解を表示</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div id="answer-mask" class="mask-overlay" onclick="toggleAnswer()">
@@ -813,6 +961,17 @@
                 <button id="sub-tab-mastered" class="sub-tab-btn" onclick="switchReviewSubTab('mastered')">✅ 覚えた (<span id="sub-mastered-count">0</span>)</button>
             </div>
 
+            <!-- 🎧 復習用連続音声プレイヤー -->
+            <div class="audio-player-panel">
+                <div class="audio-player-title">
+                    <span>🎧 連続音声聞き流しモード</span>
+                </div>
+                <div class="audio-controls">
+                    <button id="btn-continuous-play" class="audio-btn audio-btn-play" onclick="toggleContinuousReading()">▶ 聞き流し開始</button>
+                    <button id="btn-continuous-loop" class="audio-btn audio-btn-loop" onclick="toggleLoopAudio()">🔁 ループ: OFF</button>
+                </div>
+            </div>
+
             <div class="table-wrapper">
                 <table id="review-table">
                     <thead>
@@ -835,7 +994,7 @@
         <!-- ================= ⚙️ 設定・データタブ ================= -->
         <div id="tab-settings" class="tab-content">
             <div class="setting-section">
-                <h3>🌗 表示設定</h3>
+                <h3>🌗 表示・機能設定</h3>
                 <div class="setting-row">
                     <div>
                         <b>ダークモード切り替え</b>
@@ -843,6 +1002,23 @@
                     </div>
                     <label class="switch">
                         <input type="checkbox" id="dark-mode-toggle" onchange="toggleDarkMode()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div class="setting-row" style="border-top: 1px solid var(--border-color); margin-top: 8px; padding-top: 12px;">
+                    <div>
+                        <b>🎯 1日の目標問題数（ノルマ）</b>
+                        <div class="setting-desc">毎日の学習習慣用ノルマ数を設定します</div>
+                    </div>
+                    <input type="number" id="daily-quota-input" min="1" max="100" style="width: 70px; padding: 6px 8px; border-radius: 8px; border: 1.5px solid var(--border-color); font-weight: bold; text-align: center; outline: none; background: var(--card-bg); color: var(--text-main);" onchange="updateDailyQuotaSetting()">
+                </div>
+                <div class="setting-row" style="border-top: 1px solid var(--border-color); margin-top: 8px; padding-top: 12px;">
+                    <div>
+                        <b>正解表示時に自動音声読み上げ</b>
+                        <div class="setting-desc">暗記カードで正解を開いた際に、自動で「用語 ➔ 要約」を読み上げます</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="auto-speech-toggle" onchange="toggleAutoSpeech()">
                         <span class="slider"></span>
                     </label>
                 </div>
@@ -890,7 +1066,7 @@
                         <b>アプリバージョン</b>
                         <div class="setting-desc">用語データおよびシステムの更新状況</div>
                     </div>
-                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 1.5.0</span>
+                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 2.1.0 (ノルマカスタマイズ・穴埋め精密化)</span>
                 </div>
             </div>
 
@@ -909,10 +1085,23 @@
         const MASTER_STORAGE_KEY = "AP_STUDY_MASTERED_IDS";
         const FUZZY_STORAGE_KEY = "AP_STUDY_FUZZY_IDS";
         const DARK_MODE_KEY = "AP_STUDY_DARK_MODE";
+        const AUTO_SPEECH_KEY = "AP_STUDY_AUTO_SPEECH";
+
+        const STREAK_KEY = "AP_STUDY_STREAK_DAYS";
+        const LAST_DATE_KEY = "AP_STUDY_LAST_DATE";
+        const TODAY_COUNT_KEY = "AP_STUDY_TODAY_COUNT";
+        const QUOTA_STORAGE_KEY = "AP_STUDY_DAILY_QUOTA";
 
         let starredIds = new Set(JSON.parse(localStorage.getItem(STAR_STORAGE_KEY) || "[]"));
         let masteredIds = new Set(JSON.parse(localStorage.getItem(MASTER_STORAGE_KEY) || "[]"));
         let fuzzyIds = new Set(JSON.parse(localStorage.getItem(FUZZY_STORAGE_KEY) || "[]"));
+        let isAutoSpeechEnabled = localStorage.getItem(AUTO_SPEECH_KEY) === "true";
+
+        let streakDays = parseInt(localStorage.getItem(STREAK_KEY) || "0", 10);
+        let lastDate = localStorage.getItem(LAST_DATE_KEY) || "";
+        let todayCount = parseInt(localStorage.getItem(TODAY_COUNT_KEY) || "0", 10);
+        let dailyTargetQuota = parseInt(localStorage.getItem(QUOTA_STORAGE_KEY) || "10", 10);
+
         let currentItem = null;
         let isAnswerVisible = false;
         let currentOrderedIndex = 0;
@@ -922,6 +1111,13 @@
         let deckIndex = 0;
         let lastTargetConfig = "";
 
+        // 音声連続再生用状態管理
+        let isContinuousReading = false;
+        let isLoopAudioEnabled = false;
+        let continuousIndex = 0;
+        let continuousList = [];
+        let continuousTimer = null;
+
         document.addEventListener("DOMContentLoaded", () => {
             if (localStorage.getItem(DARK_MODE_KEY) === "true") {
                 document.body.classList.add("dark-mode");
@@ -929,10 +1125,17 @@
                 if (darkToggle) darkToggle.checked = true;
             }
 
+            const autoSpeechToggle = document.getElementById("auto-speech-toggle");
+            if (autoSpeechToggle) autoSpeechToggle.checked = isAutoSpeechEnabled;
+
+            const quotaInput = document.getElementById("daily-quota-input");
+            if (quotaInput) quotaInput.value = dailyTargetQuota;
+
+            checkStreakAndQuotaDate();
             updateStarBadge();
             updateProgress();
             if (TERMS_DATA.length > 0) {
-                nextCard();
+                nextCard(false);
             } else {
                 document.getElementById("question-text").innerText = "⚠️ 用語データ(terms.js)を読み込めませんでした。";
             }
@@ -941,7 +1144,7 @@
 
             document.addEventListener("keydown", handleKeyPress);
 
-            // 行タップによるハイライト選択＆外側タップ解除（ステータスボタン押し分け時は発火防止）
+            // 行タップによるハイライト選択＆外側タップ解除
             document.addEventListener("click", (e) => {
                 const tr = e.target.closest("tbody tr");
                 const isStatusBtn = e.target.classList.contains("star-icon") || 
@@ -960,6 +1163,70 @@
             });
         });
 
+        /* --- 🔥 ストリーク ＆ 🎯 ノルマ処理 --- */
+        function checkStreakAndQuotaDate() {
+            const today = new Date().toISOString().slice(0, 10);
+            
+            if (lastDate !== today) {
+                const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
+                if (lastDate === yesterday) {
+                } else if (lastDate === "") {
+                    streakDays = 1;
+                } else {
+                    streakDays = 1;
+                }
+                todayCount = 0;
+                lastDate = today;
+
+                localStorage.setItem(STREAK_KEY, streakDays.toString());
+                localStorage.setItem(LAST_DATE_KEY, lastDate);
+                localStorage.setItem(TODAY_COUNT_KEY, todayCount.toString());
+            }
+
+            updateStreakDisplay();
+        }
+
+        function incrementTodayStudyCount() {
+            const today = new Date().toISOString().slice(0, 10);
+            if (lastDate !== today) {
+                checkStreakAndQuotaDate();
+            }
+
+            if (todayCount === 0 && streakDays === 0) {
+                streakDays = 1;
+                localStorage.setItem(STREAK_KEY, "1");
+            }
+
+            todayCount++;
+            localStorage.setItem(TODAY_COUNT_KEY, todayCount.toString());
+            updateStreakDisplay();
+        }
+
+        function updateStreakDisplay() {
+            const streakText = document.getElementById("streak-days-text");
+            if (streakText) streakText.innerText = `${streakDays}日目`;
+
+            const quotaText = document.getElementById("today-quota-text");
+            if (quotaText) {
+                if (todayCount >= dailyTargetQuota) {
+                    quotaText.innerText = `${todayCount}語 🎉 ノルマ達成！`;
+                } else {
+                    quotaText.innerText = `${todayCount} / ${dailyTargetQuota}語`;
+                }
+            }
+        }
+
+        function updateDailyQuotaSetting() {
+            const input = document.getElementById("daily-quota-input");
+            if (!input) return;
+            let val = parseInt(input.value, 10);
+            if (isNaN(val) || val < 1) val = 1;
+            dailyTargetQuota = val;
+            input.value = val;
+            localStorage.setItem(QUOTA_STORAGE_KEY, val.toString());
+            updateStreakDisplay();
+        }
+
         function handleKeyPress(e) {
             const activeTag = document.activeElement ? document.activeElement.tagName.toLowerCase() : "";
             if (activeTag === "input" || activeTag === "textarea" || activeTag === "select") {
@@ -974,7 +1241,7 @@
                 toggleAnswer();
             } else if (e.key === "ArrowRight") {
                 e.preventDefault();
-                nextCard();
+                nextCard(true);
             } else if (e.key === "1") {
                 e.preventDefault();
                 toggleCurrentMaster();
@@ -988,6 +1255,7 @@
         }
 
         function switchTab(tabName) {
+            stopContinuousReading();
             document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
             document.querySelectorAll(".tab-content").forEach(content => content.classList.remove("active"));
 
@@ -1006,6 +1274,255 @@
                 document.querySelectorAll(".tab-btn")[3].classList.add("active");
                 document.getElementById("tab-settings").classList.add("active");
             }
+        }
+
+        /* --- 🧩 2行要約 ✕ 詳細解説 の【相関穴埋め】抽出アルゴリズム (漢字・多文網羅の強化版) --- */
+        function generateSmartClozeText(item, targetType) {
+            const textToCloze = targetType === 'summary' ? item.summary : item.details;
+            const complementText = targetType === 'summary' ? item.details : item.summary;
+
+            if (!textToCloze) return "";
+
+            let wordScores = new Map();
+            // 漢字(2文字以上)、カタカナ(2文字以上)、英数字(2文字以上) を網羅抽出
+            const regexWord = /[\u4E00-\u9FFF]{2,}|[ァ-ヶー]{2,}|[a-zA-Z0-9]{2,}/g;
+            
+            let match;
+            let allExtractedWords = new Set();
+            while ((match = regexWord.exec(textToCloze)) !== null) {
+                allExtractedWords.add(match[0]);
+            }
+
+            // 用語名や逆引きキーワードも候補に確実に追加
+            if (item.term && item.term.length >= 2 && textToCloze.includes(item.term)) {
+                allExtractedWords.add(item.term);
+            }
+            if (item.keywords) {
+                item.keywords.split(/[\s,、・]+/).forEach(kw => {
+                    if (kw.trim().length >= 2 && textToCloze.includes(kw.trim())) {
+                        allExtractedWords.add(kw.trim());
+                    }
+                });
+            }
+
+            allExtractedWords.forEach(word => {
+                let score = 1;
+                if (complementText && complementText.includes(word)) score += 3;
+                if (item.keywords && item.keywords.includes(word)) score += 2;
+                if (item.term && item.term.includes(word)) score += 2;
+
+                wordScores.set(word, score);
+            });
+
+            let sortedCandidates = Array.from(wordScores.keys()).sort((a, b) => {
+                const scoreDiff = wordScores.get(b) - wordScores.get(a);
+                if (scoreDiff !== 0) return scoreDiff;
+                return b.length - a.length;
+            });
+
+            if (sortedCandidates.length === 0) return escapeHtml(textToCloze);
+
+            let selectedClozeWords = [];
+
+            if (targetType === 'summary') {
+                // 2行要約：各文章（改行・句点・中黒区切り）ごとに最低1つ以上穴を作る
+                const sentences = textToCloze.split(/[\n。\n]/).filter(s => s.trim().length > 0);
+                
+                sentences.forEach(sentence => {
+                    let sentenceCandidates = sortedCandidates.filter(w => sentence.includes(w));
+                    
+                    if (sentenceCandidates.length > 0) {
+                        const bestWord = sentenceCandidates[0];
+                        if (!selectedClozeWords.includes(bestWord)) {
+                            selectedClozeWords.push(bestWord);
+                        }
+                    } else {
+                        // 候補がない文章でも漢字/カタカナ/英数2文字以上のフォールバック抽出
+                        const fallbackMatch = sentence.match(/[\u4E00-\u9FFF]{2,}|[ァ-ヶー]{2,}|[a-zA-Z0-9]{2,}/);
+                        if (fallbackMatch && !selectedClozeWords.includes(fallbackMatch[0])) {
+                            selectedClozeWords.push(fallbackMatch[0]);
+                        }
+                    }
+                });
+
+                if (selectedClozeWords.length === 0 && sortedCandidates.length > 0) {
+                    selectedClozeWords.push(sortedCandidates[0]);
+                }
+            } else {
+                // 詳細役割：最低3個以上の穴を作る
+                const minBlanks = Math.min(3, sortedCandidates.length);
+                sortedCandidates.forEach((word, idx) => {
+                    if (idx < minBlanks) {
+                        if (!selectedClozeWords.includes(word)) selectedClozeWords.push(word);
+                    } else {
+                        const probability = Math.max(0.3, 0.85 - (idx * 0.15));
+                        if (Math.random() < probability && selectedClozeWords.length < 5) {
+                            if (!selectedClozeWords.includes(word)) selectedClozeWords.push(word);
+                        }
+                    }
+                });
+            }
+
+            selectedClozeWords.sort((a, b) => b.length - a.length);
+
+            let resultHtml = escapeHtml(textToCloze);
+            selectedClozeWords.forEach(word => {
+                const escapedWord = escapeHtml(word);
+                const regex = new RegExp(escapeRegExp(escapedWord), 'g');
+                resultHtml = resultHtml.replace(regex, `<span class="cloze-blank" data-answer="${escapedWord}" onclick="toggleBlank(this, event)">❓</span>`);
+            });
+
+            return resultHtml;
+        }
+
+        function toggleBlank(el, event) {
+            if (event) event.stopPropagation();
+            const ans = el.getAttribute("data-answer");
+            if (el.classList.contains("revealed")) {
+                el.classList.remove("revealed");
+                el.innerText = "❓";
+            } else {
+                el.classList.add("revealed");
+                el.innerText = ans;
+            }
+        }
+
+        /* --- 🔊 音声読み上げロジック --- */
+        function speakText(text, onEndCallback) {
+            if (!('speechSynthesis' in window)) {
+                console.warn("お使いのブラウザは音声読み上げに対応していません。");
+                if (onEndCallback) onEndCallback();
+                return;
+            }
+            window.speechSynthesis.cancel();
+            const uttr = new SpeechSynthesisUtterance(text);
+            uttr.lang = 'ja-JP';
+            uttr.rate = 1.0;
+            uttr.pitch = 1.0;
+
+            uttr.onend = () => { if (onEndCallback) onEndCallback(); };
+            uttr.onerror = () => { if (onEndCallback) onEndCallback(); };
+
+            window.speechSynthesis.speak(uttr);
+        }
+
+        function speakCurrentTermOnly() {
+            if (currentItem) speakText(currentItem.term);
+        }
+
+        function playCurrentCardSpeech() {
+            if (!currentItem) return;
+            speakText(currentItem.term, () => {
+                continuousTimer = setTimeout(() => {
+                    speakText(currentItem.summary);
+                }, 2000);
+            });
+        }
+
+        function toggleAutoSpeech() {
+            isAutoSpeechEnabled = document.getElementById("auto-speech-toggle").checked;
+            localStorage.setItem(AUTO_SPEECH_KEY, isAutoSpeechEnabled ? "true" : "false");
+        }
+
+        /* --- 復習画面：連続音声聞き流し --- */
+        function toggleContinuousReading() {
+            if (isContinuousReading) {
+                stopContinuousReading();
+            } else {
+                startContinuousReading();
+            }
+        }
+
+        function toggleLoopAudio() {
+            isLoopAudioEnabled = !isLoopAudioEnabled;
+            const btn = document.getElementById("btn-continuous-loop");
+            if (btn) {
+                if (isLoopAudioEnabled) {
+                    btn.classList.add("active");
+                    btn.innerText = "🔁 ループ: ON";
+                } else {
+                    btn.classList.remove("active");
+                    btn.innerText = "🔁 ループ: OFF";
+                }
+            }
+        }
+
+        function startContinuousReading() {
+            if (currentReviewSubTab === "starred") {
+                continuousList = TERMS_DATA.filter(item => starredIds.has(item.id));
+            } else if (currentReviewSubTab === "fuzzy") {
+                continuousList = TERMS_DATA.filter(item => fuzzyIds.has(item.id));
+            } else if (currentReviewSubTab === "mastered") {
+                continuousList = TERMS_DATA.filter(item => masteredIds.has(item.id));
+            }
+
+            if (continuousList.length === 0) {
+                alert("聞き流し対象の用語がありません。");
+                return;
+            }
+
+            isContinuousReading = true;
+            continuousIndex = 0;
+            const playBtn = document.getElementById("btn-continuous-play");
+            if (playBtn) {
+                playBtn.classList.add("playing");
+                playBtn.innerText = "⏹️ 停止";
+            }
+
+            playNextContinuousItem();
+        }
+
+        function stopContinuousReading() {
+            isContinuousReading = false;
+            if (continuousTimer) clearTimeout(continuousTimer);
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+            const playBtn = document.getElementById("btn-continuous-play");
+            if (playBtn) {
+                playBtn.classList.remove("playing");
+                playBtn.innerText = "▶ 聞き流し開始";
+            }
+
+            document.querySelectorAll("tr.reading-row").forEach(r => r.classList.remove("reading-row"));
+        }
+
+        function playNextContinuousItem() {
+            if (!isContinuousReading) return;
+
+            if (continuousIndex >= continuousList.length) {
+                if (isLoopAudioEnabled) {
+                    continuousIndex = 0;
+                } else {
+                    stopContinuousReading();
+                    alert("🎉 聞き流し（1周）が完了しました！");
+                    return;
+                }
+            }
+
+            const item = continuousList[continuousIndex];
+            
+            document.querySelectorAll("tr.reading-row").forEach(r => r.classList.remove("reading-row"));
+            const targetRows = document.querySelectorAll(`#review-table-body tr`);
+            if (targetRows[continuousIndex]) {
+                targetRows[continuousIndex].classList.add("reading-row");
+                targetRows[continuousIndex].scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            speakText(item.term, () => {
+                if (!isContinuousReading) return;
+                continuousTimer = setTimeout(() => {
+                    if (!isContinuousReading) return;
+                    speakText(item.summary, () => {
+                        if (!isContinuousReading) return;
+                        continuousTimer = setTimeout(() => {
+                            if (isContinuousReading) {
+                                continuousIndex++;
+                                playNextContinuousItem();
+                            }
+                        }, 2000);
+                    });
+                }, 2000);
+            });
         }
 
         function updateProgress() {
@@ -1039,7 +1556,6 @@
             if (subMaster) subMaster.innerText = masteredIds.size;
         }
 
-        // 星（★要復習）トグル
         function toggleStar(id) {
             if (starredIds.has(id)) {
                 starredIds.delete(id);
@@ -1128,15 +1644,21 @@
         }
 
         function toggleCurrentStar() {
-            if (currentItem) toggleStar(currentItem.id);
+            if (currentItem) {
+                toggleStar(currentItem.id);
+            }
         }
 
         function toggleCurrentMaster() {
-            if (currentItem) toggleMaster(currentItem.id);
+            if (currentItem) {
+                toggleMaster(currentItem.id);
+            }
         }
 
         function toggleCurrentFuzzy() {
-            if (currentItem) toggleFuzzy(currentItem.id);
+            if (currentItem) {
+                toggleFuzzy(currentItem.id);
+            }
         }
 
         function updateStarButtonState() {
@@ -1179,7 +1701,7 @@
             currentOrderedIndex = 0;
             shuffledDeck = [];
             deckIndex = 0;
-            nextCard();
+            nextCard(false);
         }
 
         function shuffleArray(array) {
@@ -1235,7 +1757,12 @@
             return pool;
         }
 
-        function nextCard() {
+        function nextCard(isUserAction = false) {
+            stopContinuousReading();
+            if (isUserAction) {
+                incrementTodayStudyCount();
+            }
+
             const pool = getFilteredPool();
             if (!pool || pool.length === 0) return;
 
@@ -1271,28 +1798,42 @@
 
             if (format === "term_summary") {
                 qLabel.innerText = "この用語の意味・要約を考えてください";
-                qText.innerText = currentItem.term;
-                ansMainText.innerText = currentItem.summary;
+                qText.innerHTML = escapeHtml(currentItem.term);
+                ansMainText.innerHTML = escapeHtml(currentItem.summary);
                 ansTitle.innerText = "💡 正解（2行要約メモ）& 詳細解説";
                 ansMask.innerText = "🙈 タップ / クリックで正解（2行要約）と詳細解説を表示します";
             } else if (format === "summary_term") {
                 qLabel.innerText = "この2行要約が表す用語は何ですか？";
-                qText.innerText = currentItem.summary;
-                ansMainText.innerText = currentItem.term;
+                qText.innerHTML = escapeHtml(currentItem.summary);
+                ansMainText.innerHTML = escapeHtml(currentItem.term);
                 ansTitle.innerText = "💡 正解（用語）& 詳細解説";
                 ansMask.innerText = "🙈 タップ / クリックで正解（用語）と詳細解説を表示します";
             } else if (format === "details_term") {
                 qLabel.innerText = "この詳細説明が表す用語は何ですか？";
-                qText.innerText = currentItem.details;
-                ansMainText.innerText = currentItem.term;
+                qText.innerHTML = escapeHtml(currentItem.details);
+                ansMainText.innerHTML = escapeHtml(currentItem.term);
                 ansTitle.innerText = "💡 正解（用語）& 詳細解説";
                 ansMask.innerText = "🙈 タップ / クリックで正解（用語）と詳細解説を表示します";
             } else if (format === "keywords_term") {
                 qLabel.innerText = "このキーワード群が表す用語は何ですか？";
-                qText.innerText = currentItem.keywords;
-                ansMainText.innerText = currentItem.term;
+                qText.innerHTML = escapeHtml(currentItem.keywords);
+                ansMainText.innerHTML = escapeHtml(currentItem.term);
                 ansTitle.innerText = "💡 正解（用語）& 詳細解説";
                 ansMask.innerText = "🙈 タップ / クリックで正解（用語）と詳細解説を表示します";
+            } else if (format === "term_summary_blank") {
+                qLabel.innerText = "🧩 要約の【❓】をタップして穴埋めを解いてください";
+                const cloze = generateSmartClozeText(currentItem, 'summary');
+                qText.innerHTML = `<div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; color: var(--primary);">${escapeHtml(currentItem.term)}</div><div style="font-size: 0.95rem; font-weight: normal; background: var(--bg-light); padding: 16px; border-radius: 8px; border: 1px dashed var(--secondary); text-align: left; line-height: 1.9;">${cloze}</div>`;
+                ansMainText.innerHTML = escapeHtml(currentItem.summary);
+                ansTitle.innerText = "💡 正解（2行要約メモ）& 詳細解説";
+                ansMask.innerText = "🙈 タップ / クリックで全項目の正解・詳細解説を表示します";
+            } else if (format === "term_details_blank") {
+                qLabel.innerText = "🧩 詳細役割の【❓】をタップして穴埋めを解いてください";
+                const cloze = generateSmartClozeText(currentItem, 'details');
+                qText.innerHTML = `<div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; color: var(--primary);">${escapeHtml(currentItem.term)}</div><div style="font-size: 0.95rem; font-weight: normal; background: var(--bg-light); padding: 16px; border-radius: 8px; border: 1px dashed var(--secondary); text-align: left; line-height: 1.9;">${cloze}</div>`;
+                ansMainText.innerHTML = escapeHtml(currentItem.details);
+                ansTitle.innerText = "💡 正解（詳細役割）& 詳細解説";
+                ansMask.innerText = "🙈 タップ / クリックで全項目の正解・詳細解説を表示します";
             }
 
             renderDetailsContainer(format, currentItem);
@@ -1318,7 +1859,7 @@
             ];
 
             let bottomKey = "summary";
-            if (format === "details_term") {
+            if (format === "details_term" || format === "term_details_blank") {
                 bottomKey = "details";
             } else if (format === "keywords_term") {
                 bottomKey = "keywords";
@@ -1361,6 +1902,16 @@
             document.getElementById("answer-content").style.display = "block";
             document.getElementById("ans-btn-icon").innerText = "🙈";
             document.getElementById("ans-btn-text").innerText = "隠す";
+
+            document.querySelectorAll(".cloze-blank").forEach(el => {
+                const ans = el.getAttribute("data-answer");
+                el.classList.add("revealed");
+                el.innerText = ans;
+            });
+
+            if (isAutoSpeechEnabled) {
+                playCurrentCardSpeech();
+            }
         }
 
         function hideAnswer() {
@@ -1369,6 +1920,11 @@
             document.getElementById("answer-content").style.display = "none";
             document.getElementById("ans-btn-icon").innerText = "👁️";
             document.getElementById("ans-btn-text").innerText = "正解を表示";
+
+            document.querySelectorAll(".cloze-blank").forEach(el => {
+                el.classList.remove("revealed");
+                el.innerText = "❓";
+            });
         }
 
         function toggleColumnExpand(tableId, colIndex) {
@@ -1450,6 +2006,7 @@
         }
 
         function switchReviewSubTab(subTabName) {
+            stopContinuousReading();
             currentReviewSubTab = subTabName;
             document.querySelectorAll(".sub-tab-btn").forEach(btn => btn.classList.remove("active"));
             if (subTabName === 'starred') {
@@ -1524,7 +2081,6 @@
             return str.replace(/[ァ-ヶ]/g, ch => String.fromCharCode(ch.charCodeAt(0) - 0x60));
         }
 
-        // 正規表現用のエスケープ関数 (修正済み)
         function escapeRegExp(string) {
             return string.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         }
@@ -1580,6 +2136,10 @@
                 starred: Array.from(starredIds),
                 mastered: Array.from(masteredIds),
                 fuzzy: Array.from(fuzzyIds),
+                streakDays: streakDays,
+                lastDate: lastDate,
+                todayCount: todayCount,
+                dailyTargetQuota: dailyTargetQuota,
                 exportDate: new Date().toISOString()
             };
             const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
@@ -1612,6 +2172,26 @@
                         fuzzyIds = new Set(imported.fuzzy);
                         localStorage.setItem(FUZZY_STORAGE_KEY, JSON.stringify(Array.from(fuzzyIds)));
                     }
+                    if (typeof imported.streakDays === "number") {
+                        streakDays = imported.streakDays;
+                        localStorage.setItem(STREAK_KEY, streakDays.toString());
+                    }
+                    if (typeof imported.lastDate === "string") {
+                        lastDate = imported.lastDate;
+                        localStorage.setItem(LAST_DATE_KEY, lastDate);
+                    }
+                    if (typeof imported.todayCount === "number") {
+                        todayCount = imported.todayCount;
+                        localStorage.setItem(TODAY_COUNT_KEY, todayCount.toString());
+                    }
+                    if (typeof imported.dailyTargetQuota === "number") {
+                        dailyTargetQuota = imported.dailyTargetQuota;
+                        localStorage.setItem(QUOTA_STORAGE_KEY, dailyTargetQuota.toString());
+                        const quotaInput = document.getElementById("daily-quota-input");
+                        if (quotaInput) quotaInput.value = dailyTargetQuota;
+                    }
+
+                    updateStreakDisplay();
                     updateProgress();
                     renderMasterTable();
                     renderReviewTable();
