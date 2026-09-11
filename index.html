@@ -68,6 +68,7 @@
             justify-content: center;
         }
 
+        /* ① タイトルの1行固定＆自動サイズ調整 */
         header h1 {
             font-size: clamp(0.8rem, 3.8vw, 1.2rem);
             font-weight: 700;
@@ -133,6 +134,7 @@
             border: 1px solid var(--border-color);
         }
 
+        /* ② 習得状況見出しの1行固定＆サイズ微調整 */
         .progress-header {
             display: flex;
             justify-content: space-between;
@@ -292,6 +294,7 @@
             gap: 8px;
         }
 
+        /* ③問題文ラベル ＆ ④正解文タイトルの1行固定設定 */
         #question-label, #ans-title-text {
             white-space: nowrap;
             overflow: hidden;
@@ -468,8 +471,17 @@
             color: var(--text-main);
         }
 
-        tr:hover td {
-            background-color: var(--expand-bg);
+        /* PCのマウス操作時のみホバーハイライトを有効化 */
+        @media (hover: hover) {
+            tr:hover td {
+                background-color: var(--expand-bg);
+            }
+        }
+
+        /* スマホ・PC共通：タップ（クリック）で選択された行のハイライト */
+        tr.selected td {
+            background-color: var(--expand-bg) !important;
+            box-shadow: inset 0 2px 0 var(--secondary), inset 0 -2px 0 var(--secondary);
         }
 
         .star-icon {
@@ -833,7 +845,7 @@
                         <b>アプリバージョン</b>
                         <div class="setting-desc">用語データおよびシステムの更新状況</div>
                     </div>
-                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 1.5.0</span>
+                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 1.6.0</span>
                 </div>
             </div>
 
@@ -883,6 +895,22 @@
             renderReviewTable();
 
             document.addEventListener("keydown", handleKeyPress);
+
+            // 行タップによるハイライト選択＆外側タップ解除
+            document.addEventListener("click", (e) => {
+                const tr = e.target.closest("tbody tr");
+                const isStar = e.target.classList.contains("star-icon");
+
+                if (tr && !isStar) {
+                    const isAlreadySelected = tr.classList.contains("selected");
+                    document.querySelectorAll("tbody tr.selected").forEach(r => r.classList.remove("selected"));
+                    if (!isAlreadySelected) {
+                        tr.classList.add("selected");
+                    }
+                } else if (!e.target.closest("table")) {
+                    document.querySelectorAll("tbody tr.selected").forEach(r => r.classList.remove("selected"));
+                }
+            });
         });
 
         function handleKeyPress(e) {
