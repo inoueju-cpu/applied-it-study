@@ -322,13 +322,53 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
-            gap: 8px;
+            gap: 6px;
+            flex-wrap: nowrap; /* 1行固定 */
+            overflow: hidden;
+        }
+
+        /* 🌙 ダークモードでのタイトル色視認性調整 */
+        body.dark-mode .box-title {
+            color: #81a1c1;
         }
 
         #question-label, #ans-title-text {
             white-space: nowrap;
             overflow: hidden;
-            text-overflow: ellipsis;
+            text-overflow: ellipsis; /* 長いタイトルは「...」化 */
+            min-width: 0;
+            flex: 1;
+        }
+
+        .box-title-buttons {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+            flex-shrink: 0; /* ボタン群は縮めない */
+            white-space: nowrap;
+        }
+
+        /* 🔊 読み上げボタン（小さめ・コンパクト設定） */
+        .audio-btn {
+            padding: 2px 6px;
+            font-size: clamp(0.62rem, 1.8vw, 0.72rem);
+            font-weight: 700;
+            border-radius: 5px;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-main);
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+            line-height: 1.2;
+        }
+
+        .btn-toggle-ans {
+            padding: 4px 8px !important;
+            font-size: clamp(0.65rem, 2.1vw, 0.8rem) !important;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .box-body {
@@ -343,6 +383,19 @@
             flex-direction: column;
             align-items: center;
             justify-content: center;
+        }
+
+        /* 🧩 穴埋めモード内の問題用語タイトル */
+        .cloze-term-title {
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: var(--primary);
+        }
+
+        /* 🌙 ダークモードでの穴埋め問題用語タイトルの視認性調整 */
+        body.dark-mode .cloze-term-title {
+            color: #81a1c1;
         }
 
         /* 穴埋め用のインタラクティブ空欄デザイン */
@@ -382,6 +435,10 @@
 
         .ans-box .box-title {
             color: var(--accent);
+        }
+
+        body.dark-mode .ans-box .box-title {
+            color: #ff8b8b;
         }
 
         .ans-box .box-body {
@@ -683,22 +740,12 @@
             gap: 6px;
         }
 
-        .audio-btn {
-            padding: 6px 12px;
-            font-size: 0.78rem;
-            font-weight: 700;
-            border-radius: 8px;
-            border: 1px solid var(--border-color);
-            background: var(--card-bg);
-            color: var(--text-main);
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
         .audio-btn-play {
             background: var(--primary);
             color: white;
             border-color: var(--primary);
+            padding: 6px 12px;
+            font-size: 0.78rem;
         }
 
         .audio-btn-play.playing {
@@ -896,7 +943,7 @@
             <div class="box">
                 <div class="box-title">
                     <span id="question-label">問題 (用語)</span>
-                    <button class="audio-btn" onclick="speakCurrentTermOnly()" style="padding: 2px 8px; font-size: 0.75rem;">🔊 読み上げ</button>
+                    <button id="btn-speak-term" class="audio-btn" onclick="speakCurrentTermOnly()">🔊 読み上げ</button>
                 </div>
                 <div id="question-text" class="box-body">
                     読み込み中...
@@ -906,9 +953,9 @@
             <div class="box ans-box">
                 <div class="box-title" onclick="toggleAnswer()" style="cursor: pointer; user-select: none;">
                     <span id="ans-title-text">💡 正解 & 詳細解説</span>
-                    <div style="display: flex; gap: 4px; align-items: center;">
-                        <button class="audio-btn" onclick="event.stopPropagation(); playCurrentCardSpeech()" style="padding: 2px 8px; font-size: 0.75rem;">🔊 全文読み上げ</button>
-                        <button class="btn btn-toggle-ans" style="padding: 6px 12px; font-size: 0.85rem; pointer-events: none;">
+                    <div class="box-title-buttons">
+                        <button id="btn-speak-card" class="audio-btn" onclick="event.stopPropagation(); playCurrentCardSpeech()">🔊 全文読み上げ</button>
+                        <button class="btn btn-toggle-ans" style="pointer-events: none;">
                             <span id="ans-btn-icon">👁️</span> <span id="ans-btn-text">正解を表示</span>
                         </button>
                     </div>
@@ -1072,7 +1119,7 @@
                         <b>アプリバージョン</b>
                         <div class="setting-desc">用語データおよびシステムの更新状況</div>
                     </div>
-                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 2.3.0 (音量調整・UI絵文字最適化)</span>
+                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 2.4.1 (ダークモード視認性＆音声トグル最適化)</span>
                 </div>
             </div>
 
@@ -1119,8 +1166,9 @@
         let deckIndex = 0;
         let lastTargetConfig = "";
 
-        // 音声連続再生用状態管理
-        let isContinuousReading = false;
+        // 音声関連状態管理
+        let isCardSpeaking = false; // 暗記カード個別再生中フラグ
+        let isContinuousReading = false; // 復習連続再生中フラグ
         let isLoopAudioEnabled = false;
         let continuousIndex = 0;
         let continuousList = [];
@@ -1183,10 +1231,9 @@
             
             if (lastDate !== today) {
                 const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-                if (lastDate === yesterday) {
-                } else if (lastDate === "") {
+                if (lastDate !== yesterday && lastDate !== "") {
                     streakDays = 1;
-                } else {
+                } else if (lastDate === "") {
                     streakDays = 1;
                 }
                 todayCount = 0;
@@ -1285,6 +1332,7 @@
 
         function switchTab(tabName) {
             stopContinuousReading();
+            stopCardSpeech();
             document.querySelectorAll(".tab-btn").forEach(btn => btn.classList.remove("active"));
             document.querySelectorAll(".tab-content").forEach(content => content.classList.remove("active"));
 
@@ -1305,7 +1353,7 @@
             }
         }
 
-        /* --- 🧩 優先順位（キーワード > 「」 > ○○() > 相関 > その他）に基づく【高度穴埋め】抽出アルゴリズム --- */
+        /* --- 🧩 優先順位 ＆ 2段階プレースホルダーによる【高度穴埋め】抽出アルゴリズム --- */
         function generateSmartClozeText(item, targetType) {
             const textToCloze = targetType === 'summary' ? item.summary : item.details;
             const complementText = targetType === 'summary' ? item.details : item.summary;
@@ -1354,7 +1402,7 @@
                 }
             }
 
-            // 4. 2行要約と詳細役割の両方に存在する単語（相関スコア +4）＆ 一般語抽出
+            // 4. 一般語＆相関スコア抽出
             const regexWord = /[\u4E00-\u9FFF]{2,}|[ァ-ヶー]{2,}|[a-zA-Z0-9]{2,}/g;
             let matchW;
             while ((matchW = regexWord.exec(textToCloze)) !== null) {
@@ -1383,17 +1431,35 @@
                 const sentences = textToCloze.split(/[\n。\n]/).filter(s => s.trim().length > 0);
                 
                 sentences.forEach(sentence => {
-                    let sentenceCandidates = sortedCandidates.filter(w => sentence.includes(w));
+                    const lineLen = sentence.trim().length;
                     
-                    if (sentenceCandidates.length > 0) {
-                        const bestWord = sentenceCandidates[0];
-                        if (!selectedClozeWords.includes(bestWord)) {
-                            selectedClozeWords.push(bestWord);
+                    // 文字数に応じた穴埋め数ルール（30未満: 1個 / 30〜70: 2個 / 71以上: 3個）
+                    let neededCount = 1;
+                    if (lineLen >= 71) {
+                        neededCount = 3;
+                    } else if (lineLen >= 30) {
+                        neededCount = 2;
+                    }
+
+                    let sentenceCandidates = sortedCandidates.filter(w => sentence.includes(w));
+                    let addedForThisSentence = 0;
+
+                    for (const word of sentenceCandidates) {
+                        if (addedForThisSentence >= neededCount) break;
+                        if (!selectedClozeWords.includes(word)) {
+                            selectedClozeWords.push(word);
+                            addedForThisSentence++;
                         }
-                    } else {
-                        const fallbackMatch = sentence.match(/[\u4E00-\u9FFF]{2,}|[ァ-ヶー]{2,}|[a-zA-Z0-9]{2,}/);
-                        if (fallbackMatch && !selectedClozeWords.includes(fallbackMatch[0])) {
-                            selectedClozeWords.push(fallbackMatch[0]);
+                    }
+
+                    if (addedForThisSentence < neededCount) {
+                        const matches = sentence.match(/[\u4E00-\u9FFF]{2,}|[ァ-ヶー]{2,}|[a-zA-Z0-9]{2,}/g) || [];
+                        for (const matchWord of matches) {
+                            if (addedForThisSentence >= neededCount) break;
+                            if (!selectedClozeWords.includes(matchWord)) {
+                                selectedClozeWords.push(matchWord);
+                                addedForThisSentence++;
+                            }
                         }
                     }
                 });
@@ -1415,13 +1481,28 @@
                 });
             }
 
+            // 長い単語から優先して置換処理
             selectedClozeWords.sort((a, b) => b.length - a.length);
 
             let resultHtml = escapeHtml(textToCloze);
-            selectedClozeWords.forEach(word => {
+            const placeholderMap = new Map();
+
+            // 1. プレースホルダーへ置換（HTMLタグ破綻防止）
+            selectedClozeWords.forEach((word, index) => {
                 const escapedWord = escapeHtml(word);
+                const placeholder = `___CLOZE_PH_${index}___`;
+                const spanHtml = `<span class="cloze-blank" data-answer="${escapedWord}" onclick="toggleBlank(this, event)">❓</span>`;
+                
+                placeholderMap.set(placeholder, spanHtml);
+
                 const regex = new RegExp(escapeRegExp(escapedWord), 'g');
-                resultHtml = resultHtml.replace(regex, `<span class="cloze-blank" data-answer="${escapedWord}" onclick="toggleBlank(this, event)">❓</span>`);
+                resultHtml = resultHtml.replace(regex, placeholder);
+            });
+
+            // 2. 最後にプレースホルダーを実際のHTMLタグへ一括変換
+            placeholderMap.forEach((htmlTag, placeholder) => {
+                const regex = new RegExp(escapeRegExp(placeholder), 'g');
+                resultHtml = resultHtml.replace(regex, htmlTag);
             });
 
             return resultHtml;
@@ -1439,7 +1520,7 @@
             }
         }
 
-        /* --- 🔊 音声読み上げロジック (音量調整対応) --- */
+        /* --- 🔊 音声読み上げロジック --- */
         function speakText(text, onEndCallback) {
             if (!('speechSynthesis' in window)) {
                 console.warn("お使いのブラウザは音声読み上げに対応していません。");
@@ -1451,7 +1532,7 @@
             uttr.lang = 'ja-JP';
             uttr.rate = 1.0;
             uttr.pitch = 1.0;
-            uttr.volume = speechVolume; // 設定された音量を適用
+            uttr.volume = speechVolume;
 
             uttr.onend = () => { if (onEndCallback) onEndCallback(); };
             uttr.onerror = () => { if (onEndCallback) onEndCallback(); };
@@ -1459,15 +1540,58 @@
             window.speechSynthesis.speak(uttr);
         }
 
+        function stopCardSpeech() {
+            isCardSpeaking = false;
+            if (continuousTimer) clearTimeout(continuousTimer);
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
+
+            const termBtn = document.getElementById("btn-speak-term");
+            if (termBtn) termBtn.innerText = "🔊 読み上げ";
+
+            const cardBtn = document.getElementById("btn-speak-card");
+            if (cardBtn) cardBtn.innerText = "🔊 全文読み上げ";
+        }
+
         function speakCurrentTermOnly() {
-            if (currentItem) speakText(currentItem.term);
+            if (!currentItem) return;
+
+            if (isCardSpeaking || (window.speechSynthesis && window.speechSynthesis.speaking)) {
+                stopCardSpeech();
+                return;
+            }
+
+            stopCardSpeech();
+            isCardSpeaking = true;
+
+            const termBtn = document.getElementById("btn-speak-term");
+            if (termBtn) termBtn.innerText = "⏹️ 停止";
+
+            speakText(currentItem.term, () => {
+                stopCardSpeech();
+            });
         }
 
         function playCurrentCardSpeech() {
             if (!currentItem) return;
+
+            if (isCardSpeaking || (window.speechSynthesis && window.speechSynthesis.speaking)) {
+                stopCardSpeech();
+                return;
+            }
+
+            stopCardSpeech();
+            isCardSpeaking = true;
+
+            const cardBtn = document.getElementById("btn-speak-card");
+            if (cardBtn) cardBtn.innerText = "⏹️ 停止";
+
             speakText(currentItem.term, () => {
+                if (!isCardSpeaking) return;
                 continuousTimer = setTimeout(() => {
-                    speakText(currentItem.summary);
+                    if (!isCardSpeaking) return;
+                    speakText(currentItem.summary, () => {
+                        stopCardSpeech();
+                    });
                 }, 2000);
             });
         }
@@ -1514,6 +1638,7 @@
                 return;
             }
 
+            stopCardSpeech();
             isContinuousReading = true;
             continuousIndex = 0;
             const playBtn = document.getElementById("btn-continuous-play");
@@ -1812,6 +1937,7 @@
 
         function nextCard(isUserAction = false) {
             stopContinuousReading();
+            stopCardSpeech();
             if (isUserAction) {
                 incrementTodayStudyCount();
             }
@@ -1876,14 +2002,14 @@
             } else if (format === "term_summary_blank") {
                 qLabel.innerText = "🧩 要約の【❓】をタップして穴埋めを解いてください";
                 const cloze = generateSmartClozeText(currentItem, 'summary');
-                qText.innerHTML = `<div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; color: var(--primary);">${escapeHtml(currentItem.term)}</div><div style="font-size: 0.95rem; font-weight: normal; background: var(--bg-light); padding: 16px; border-radius: 8px; border: 1px dashed var(--secondary); text-align: left; line-height: 1.9;">${cloze}</div>`;
+                qText.innerHTML = `<div class="cloze-term-title">${escapeHtml(currentItem.term)}</div><div style="font-size: 0.95rem; font-weight: normal; background: var(--bg-light); padding: 16px; border-radius: 8px; border: 1px dashed var(--secondary); text-align: left; line-height: 1.9;">${cloze}</div>`;
                 ansMainText.innerHTML = escapeHtml(currentItem.summary);
                 ansTitle.innerText = "💡 正解（2行要約メモ）& 詳細解説";
                 ansMask.innerText = "🙈 タップ / クリックで全項目の正解・詳細解説を表示します";
             } else if (format === "term_details_blank") {
                 qLabel.innerText = "🧩 詳細役割の【❓】をタップして穴埋めを解いてください";
                 const cloze = generateSmartClozeText(currentItem, 'details');
-                qText.innerHTML = `<div style="font-size: 1.1rem; font-weight: bold; margin-bottom: 12px; color: var(--primary);">${escapeHtml(currentItem.term)}</div><div style="font-size: 0.95rem; font-weight: normal; background: var(--bg-light); padding: 16px; border-radius: 8px; border: 1px dashed var(--secondary); text-align: left; line-height: 1.9;">${cloze}</div>`;
+                qText.innerHTML = `<div class="cloze-term-title">${escapeHtml(currentItem.term)}</div><div style="font-size: 0.95rem; font-weight: normal; background: var(--bg-light); padding: 16px; border-radius: 8px; border: 1px dashed var(--secondary); text-align: left; line-height: 1.9;">${cloze}</div>`;
                 ansMainText.innerHTML = escapeHtml(currentItem.details);
                 ansTitle.innerText = "💡 正解（詳細役割）& 詳細解説";
                 ansMask.innerText = "🙈 タップ / クリックで全項目の正解・詳細解説を表示します";
@@ -2060,6 +2186,7 @@
 
         function switchReviewSubTab(subTabName) {
             stopContinuousReading();
+            stopCardSpeech();
             currentReviewSubTab = subTabName;
             document.querySelectorAll(".sub-tab-btn").forEach(btn => btn.classList.remove("active"));
             if (subTabName === 'starred') {
