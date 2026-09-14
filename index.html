@@ -1119,7 +1119,7 @@
                         <b>アプリバージョン</b>
                         <div class="setting-desc">用語データおよびシステムの更新状況</div>
                     </div>
-                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 2.4.1 (ダークモード視認性＆音声トグル最適化)</span>
+                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 2.6.0 (重み付き確率サンプリング穴埋め実装)</span>
                 </div>
             </div>
 
@@ -1353,7 +1353,7 @@
             }
         }
 
-        /* --- 🧩 優先順位 ＆ 2段階プレースホルダーによる【高度穴埋め】抽出アルゴリズム --- */
+        /* --- 🧩 優先順位 ＆ 重み付き確率サンプリングによる【高度穴埋め】抽出アルゴリズム --- */
         function generateSmartClozeText(item, targetType) {
             const textToCloze = targetType === 'summary' ? item.summary : item.details;
             const complementText = targetType === 'summary' ? item.details : item.summary;
@@ -1372,7 +1372,7 @@
                 wordScores.set(trimmed, currentScore + scoreToAdd);
             };
 
-            // 1. 逆引きキーワード（スコア +10）
+            // 1. 逆引きキーワード（最高優先度：スコア +10）
             if (item.keywords) {
                 item.keywords.split(/[\s,、・]+/).forEach(kw => {
                     if (kw.trim().length >= 2 && textToCloze.includes(kw.trim())) {
@@ -1381,7 +1381,7 @@
                 });
             }
 
-            // 2. 「」や『』の中身（スコア +8）
+            // 2. 「」や『』の中身（高優先度：スコア +8）
             const regexQuote = /[「『]([^」』]+)[」』]/g;
             let matchQ;
             while ((matchQ = regexQuote.exec(textToCloze)) !== null) {
@@ -1390,7 +1390,7 @@
                 }
             }
 
-            // 3. ○○() の直前の○○ か ()の中身（スコア +6）
+            // 3. ○○() の直前の○○ か ()の中身（中優先度：スコア +6）
             const regexParen = /([\u4E00-\u9FFFァ-ヶーa-zA-Z0-9]{2,})?[（\(]([^）\)]+)[）\)]/g;
             let matchP;
             while ((matchP = regexParen.exec(textToCloze)) !== null) {
@@ -1402,14 +1402,14 @@
                 }
             }
 
-            // 4. 一般語＆相関スコア抽出
+            // 4. 一般語＆相関スコア抽出（標準：スコア 1〜5）
             const regexWord = /[\u4E00-\u9FFF]{2,}|[ァ-ヶー]{2,}|[a-zA-Z0-9]{2,}/g;
             let matchW;
             while ((matchW = regexWord.exec(textToCloze)) !== null) {
                 const word = matchW[0];
                 let score = 1;
                 if (complementText && complementText.includes(word)) {
-                    score += 4;
+                    score += 3;
                 }
                 if (item.term && item.term.includes(word)) {
                     score += 2;
@@ -1417,13 +1417,18 @@
                 addWordScore(word, score);
             }
 
-            let sortedCandidates = Array.from(wordScores.keys()).sort((a, b) => {
-                const scoreDiff = wordScores.get(b) - wordScores.get(a);
-                if (scoreDiff !== 0) return scoreDiff;
-                return b.length - a.length;
-            });
+            if (wordScores.size === 0) return escapeHtml(textToCloze);
 
-            if (sortedCandidates.length === 0) return escapeHtml(textToCloze);
+            // 🎲 重み付き確率抽出関数（Efraimidis-Spirakis アルゴリズム）
+            const weightedSample = (candidatesMap) => {
+                let sampled = [];
+                candidatesMap.forEach((score, word) => {
+                    const key = Math.pow(Math.random(), 1 / score);
+                    sampled.push({ word, key });
+                });
+                sampled.sort((a, b) => b.key - a.key);
+                return sampled.map(item => item.word);
+            };
 
             let selectedClozeWords = [];
 
@@ -1432,62 +1437,73 @@
                 
                 sentences.forEach(sentence => {
                     const lineLen = sentence.trim().length;
-                    
-                    // 文字数に応じた穴埋め数ルール（30未満: 1個 / 30〜70: 2個 / 71以上: 3個）
-                    let neededCount = 1;
-                    if (lineLen >= 71) {
-                        neededCount = 3;
-                    } else if (lineLen >= 30) {
-                        neededCount = 2;
+
+                    // 文字数に応じた【最小値ルール】（40未満: 1個 / 40〜80: 2個 / 81以上: 3個）
+                    let minCount = 1;
+                    if (lineLen >= 81) {
+                        minCount = 3;
+                    } else if (lineLen >= 40) {
+                        minCount = 2;
                     }
 
-                    let sentenceCandidates = sortedCandidates.filter(w => sentence.includes(w));
-                    let addedForThisSentence = 0;
+                    // 行内に存在する高スコア語句（6点以上：『』「」・()・逆引き等）をカウント
+                    let highScoreCount = 0;
+                    let sentenceMap = new Map();
+                    wordScores.forEach((score, word) => {
+                        if (sentence.includes(word)) {
+                            sentenceMap.set(word, score);
+                            if (score >= 6) highScoreCount++;
+                        }
+                    });
 
-                    for (const word of sentenceCandidates) {
+                    // 判定：高スコア語句が2個以上あれば確定で+1、そうでなければ65%の確率で+1
+                    const shouldAddExtra = (highScoreCount >= 2) || (Math.random() < 0.65);
+                    const neededCount = minCount + (shouldAddExtra ? 1 : 0);
+
+                    // 候補数が足りない場合は行内の一般語もプールに補填
+                    if (sentenceMap.size < neededCount) {
+                        const matches = sentence.match(/[\u4E00-\u9FFF]{2,}|[ァ-ヶー]{2,}|[a-zA-Z0-9]{2,}/g) || [];
+                        matches.forEach(m => {
+                            if (!sentenceMap.has(m)) {
+                                sentenceMap.set(m, 1);
+                            }
+                        });
+                    }
+
+                    // 重み付き確率に基づき優先度順でシャッフル抽出
+                    const weightedWords = weightedSample(sentenceMap);
+
+                    let addedForThisSentence = 0;
+                    for (const word of weightedWords) {
                         if (addedForThisSentence >= neededCount) break;
                         if (!selectedClozeWords.includes(word)) {
                             selectedClozeWords.push(word);
                             addedForThisSentence++;
                         }
                     }
-
-                    if (addedForThisSentence < neededCount) {
-                        const matches = sentence.match(/[\u4E00-\u9FFF]{2,}|[ァ-ヶー]{2,}|[a-zA-Z0-9]{2,}/g) || [];
-                        for (const matchWord of matches) {
-                            if (addedForThisSentence >= neededCount) break;
-                            if (!selectedClozeWords.includes(matchWord)) {
-                                selectedClozeWords.push(matchWord);
-                                addedForThisSentence++;
-                            }
-                        }
-                    }
                 });
 
-                if (selectedClozeWords.length === 0 && sortedCandidates.length > 0) {
-                    selectedClozeWords.push(sortedCandidates[0]);
+                if (selectedClozeWords.length === 0 && wordScores.size > 0) {
+                    const allWords = weightedSample(wordScores);
+                    if (allWords.length > 0) selectedClozeWords.push(allWords[0]);
                 }
             } else {
-                const minBlanks = Math.min(3, sortedCandidates.length);
-                sortedCandidates.forEach((word, idx) => {
-                    if (idx < minBlanks) {
-                        if (!selectedClozeWords.includes(word)) selectedClozeWords.push(word);
-                    } else {
-                        const probability = Math.max(0.3, 0.85 - (idx * 0.15));
-                        if (Math.random() < probability && selectedClozeWords.length < 5) {
-                            if (!selectedClozeWords.includes(word)) selectedClozeWords.push(word);
-                        }
-                    }
+                const minBlanks = Math.min(3, wordScores.size);
+                const neededCount = minBlanks + (Math.random() < 0.5 ? 1 : 0);
+                
+                const weightedWords = weightedSample(wordScores);
+                weightedWords.slice(0, neededCount).forEach(word => {
+                    if (!selectedClozeWords.includes(word)) selectedClozeWords.push(word);
                 });
             }
 
-            // 長い単語から優先して置換処理
+            // 長い単語から優先して置換（HTML破損防止）
             selectedClozeWords.sort((a, b) => b.length - a.length);
 
             let resultHtml = escapeHtml(textToCloze);
             const placeholderMap = new Map();
 
-            // 1. プレースホルダーへ置換（HTMLタグ破綻防止）
+            // 1. プレースホルダーへ置換
             selectedClozeWords.forEach((word, index) => {
                 const escapedWord = escapeHtml(word);
                 const placeholder = `___CLOZE_PH_${index}___`;
@@ -1499,7 +1515,7 @@
                 resultHtml = resultHtml.replace(regex, placeholder);
             });
 
-            // 2. 最後にプレースホルダーを実際のHTMLタグへ一括変換
+            // 2. プレースホルダーをHTMLタグへ復元
             placeholderMap.forEach((htmlTag, placeholder) => {
                 const regex = new RegExp(escapeRegExp(placeholder), 'g');
                 resultHtml = resultHtml.replace(regex, htmlTag);
