@@ -323,11 +323,10 @@
             align-items: center;
             justify-content: space-between;
             gap: 6px;
-            flex-wrap: nowrap; /* 1行固定 */
+            flex-wrap: nowrap;
             overflow: hidden;
         }
 
-        /* 🌙 ダークモードでのタイトル色視認性調整 */
         body.dark-mode .box-title {
             color: #81a1c1;
         }
@@ -335,7 +334,7 @@
         #question-label, #ans-title-text {
             white-space: nowrap;
             overflow: hidden;
-            text-overflow: ellipsis; /* 長いタイトルは「...」化 */
+            text-overflow: ellipsis;
             min-width: 0;
             flex: 1;
         }
@@ -344,11 +343,10 @@
             display: flex;
             gap: 4px;
             align-items: center;
-            flex-shrink: 0; /* ボタン群は縮めない */
+            flex-shrink: 0;
             white-space: nowrap;
         }
 
-        /* 🔊 読み上げボタン（小さめ・コンパクト設定） */
         .audio-btn {
             padding: 2px 6px;
             font-size: clamp(0.62rem, 1.8vw, 0.72rem);
@@ -385,7 +383,6 @@
             justify-content: center;
         }
 
-        /* 🧩 穴埋めモード内の問題用語タイトル */
         .cloze-term-title {
             font-size: 1.1rem;
             font-weight: bold;
@@ -393,12 +390,10 @@
             color: var(--primary);
         }
 
-        /* 🌙 ダークモードでの穴埋め問題用語タイトルの視認性調整 */
         body.dark-mode .cloze-term-title {
             color: #81a1c1;
         }
 
-        /* 穴埋め用のインタラクティブ空欄デザイン */
         .cloze-blank {
             display: inline-block;
             min-width: 3.5em;
@@ -491,7 +486,8 @@
         body.dark-mode .detail-item-title { color: #81a1c1; }
 
         .detail-item-content {
-            font-size: 0.95rem;
+            font-size: 0.75rem;
+            line-height: 1.5;
             white-space: pre-wrap;
             color: var(--text-main);
         }
@@ -570,13 +566,12 @@
         th.no-expand { cursor: default; }
         th.no-expand:hover { background-color: var(--primary); }
 
-        .col-star { width: 28px; text-align: center; padding: 6px 0; }
-        .col-id { width: 28px; text-align: center; padding: 8px 0; }
-        .col-term { width: 17%; }
-        .col-summary { width: 24%; }
-        .col-keywords { width: 19%; }
-        .col-analogy { width: 18%; }
-        .col-details { width: 22%; }
+.col-star { width: 28px; text-align: center; padding: 6px 0; }
+.col-id { width: 28px; text-align: center; padding: 8px 0; }
+.col-term { width: 20%; }
+.col-summary { width: 34%; }
+.col-etymology { width: 24%; }
+.col-keywords { width: 22%; }
 
         th.col-expanded, td.col-expanded {
             width: 48% !important;
@@ -680,6 +675,91 @@
             display: block;
             margin-top: 2px;
             white-space: nowrap;
+        }
+
+        /* --- 🪟 用語詳細モーダルパネル --- */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.6);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 15px;
+            backdrop-filter: blur(3px);
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            border-radius: 14px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border: 1px solid var(--border-color);
+            padding: 20px;
+            position: relative;
+            animation: modalFadeIn 0.2s ease;
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-close-btn {
+            position: absolute;
+            top: 12px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: var(--text-muted);
+            cursor: pointer;
+            line-height: 1;
+            padding: 5px;
+        }
+
+        .modal-header {
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            padding-right: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-term-title {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        body.dark-mode .modal-term-title { color: #81a1c1; }
+
+        .modal-body {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .col-term-clickable {
+            cursor: pointer;
+            color: var(--primary);
+            text-decoration: underline;
+            text-decoration-color: rgba(31, 78, 120, 0.3);
+        }
+
+        body.dark-mode .col-term-clickable {
+            color: #81a1c1;
+            text-decoration-color: rgba(129, 161, 193, 0.3);
         }
 
         /* --- 復習サブタブ & 音声コントロール --- */
@@ -880,7 +960,6 @@
         <!-- ================= 🎯 暗記カードタブ ================= -->
         <div id="tab-card" class="tab-content active">
             <div class="progress-panel">
-                <!-- 🔥 ストリーク ＆ 🎯 ノルマ表示エリア -->
                 <div class="streak-container">
                     <span>🔥 連続学習: <span id="streak-days-text">0日目</span></span>
                     <span>🎯 今日の目標: <span id="today-quota-text">0 / 10語</span></span>
@@ -977,65 +1056,64 @@
 
         <!-- ================= 📚 用語辞書一覧タブ ================= -->
         <div id="tab-master" class="tab-content">
-            <input type="text" id="search-master" class="search-bar" placeholder="🔍 用語・キーワード等から検索（スペース区切りで絞り込み）..." oninput="filterMasterTable()">
-            <div class="search-hint">💡 単語をスペースで区切ると、複数条件で絞り込めます（例: 「DB ロック」）</div>
-            
-            <div class="table-wrapper">
-                <table id="master-table">
-                    <thead>
-                        <tr>
-                            <th class="col-star no-expand" style="text-align: center;">★</th>
-                            <th class="col-id no-expand">ID</th>
-                            <th class="col-term" onclick="toggleColumnExpand('master-table', 2)">用語 <span class="expand-hint">◀拡大▶</span></th>
-                            <th class="col-summary" onclick="toggleColumnExpand('master-table', 3)">2行要約メモ <span class="expand-hint">◀拡大▶</span></th>
-                            <th class="col-keywords" onclick="toggleColumnExpand('master-table', 4)">逆引きキーワード <span class="expand-hint">◀拡大▶</span></th>
-                            <th class="col-analogy" onclick="toggleColumnExpand('master-table', 5)">例え話 <span class="expand-hint">◀拡大▶</span></th>
-                            <th class="col-details" onclick="toggleColumnExpand('master-table', 6)">詳細な役割 <span class="expand-hint">◀拡大▶</span></th>
-                        </tr>
-                    </thead>
-                    <tbody id="master-table-body">
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    <input type="text" id="search-master" class="search-bar" placeholder="🔍 用語・キーワード等から検索（スペース区切りで絞り込み）..." oninput="filterMasterTable()">
+    <div class="search-hint">💡 <b>用語名をタップ</b>すると全7項目の詳細パネルが開きます</div>
+    
+    <div class="table-wrapper">
+        <table id="master-table">
+            <thead>
+                <tr>
+                    <th class="col-star no-expand" style="text-align: center;">★</th>
+                    <th class="col-id no-expand">ID</th>
+                    <th class="col-term" onclick="toggleColumnExpand('master-table', 2)">用語 <span class="expand-hint">◀拡大▶</span></th>
+                    <th class="col-summary" onclick="toggleColumnExpand('master-table', 3)">2行要約メモ <span class="expand-hint">◀拡大▶</span></th>
+                    <th class="col-etymology" onclick="toggleColumnExpand('master-table', 4)">英語の翻訳・語源 <span class="expand-hint">◀拡大▶</span></th>
+                    <th class="col-keywords" onclick="toggleColumnExpand('master-table', 5)">逆引きキーワード <span class="expand-hint">◀拡大▶</span></th>
+                </tr>
+            </thead>
+            <tbody id="master-table-body">
+            </tbody>
+        </table>
+    </div>
+</div>
 
         <!-- ================= 🔄 復習タブ ================= -->
         <div id="tab-review" class="tab-content">
-            <div class="sub-tabs">
-                <button id="sub-tab-starred" class="sub-tab-btn active" onclick="switchReviewSubTab('starred')">⭐ 要復習 (<span id="sub-star-count">0</span>)</button>
-                <button id="sub-tab-fuzzy" class="sub-tab-btn" onclick="switchReviewSubTab('fuzzy')">🤔 あいまい (<span id="sub-fuzzy-count">0</span>)</button>
-                <button id="sub-tab-mastered" class="sub-tab-btn" onclick="switchReviewSubTab('mastered')">✅ 覚えた (<span id="sub-mastered-count">0</span>)</button>
-            </div>
+    <div class="sub-tabs">
+        <button id="sub-tab-starred" class="sub-tab-btn active" onclick="switchReviewSubTab('starred')">⭐ 要復習 (<span id="sub-star-count">0</span>)</button>
+        <button id="sub-tab-fuzzy" class="sub-tab-btn" onclick="switchReviewSubTab('fuzzy')">🤔 あいまい (<span id="sub-fuzzy-count">0</span>)</button>
+        <button id="sub-tab-mastered" class="sub-tab-btn" onclick="switchReviewSubTab('mastered')">✅ 覚えた (<span id="sub-mastered-count">0</span>)</button>
+    </div>
 
-            <!-- 🎧 復習用連続音声プレイヤー -->
-            <div class="audio-player-panel">
-                <div class="audio-player-title">
-                    <span>🎧 連続音声聞き流しモード</span>
-                </div>
-                <div class="audio-controls">
-                    <button id="btn-continuous-play" class="audio-btn audio-btn-play" onclick="toggleContinuousReading()">▶ 聞き流し開始</button>
-                    <button id="btn-continuous-loop" class="audio-btn audio-btn-loop" onclick="toggleLoopAudio()">🔁 ループ: OFF</button>
-                </div>
-            </div>
-
-            <div class="table-wrapper">
-                <table id="review-table">
-                    <thead>
-                        <tr>
-                            <th class="col-star no-expand" style="text-align: center;">★</th>
-                            <th class="col-id no-expand">ID</th>
-                            <th class="col-term" onclick="toggleColumnExpand('review-table', 2)">用語 <span class="expand-hint">◀拡大▶</span></th>
-                            <th class="col-summary" onclick="toggleColumnExpand('review-table', 3)">2行要約メモ <span class="expand-hint">◀拡大▶</span></th>
-                            <th class="col-keywords" onclick="toggleColumnExpand('review-table', 4)">逆引きキーワード <span class="expand-hint">◀拡大▶</span></th>
-                            <th class="col-analogy" onclick="toggleColumnExpand('review-table', 5)">例え話 <span class="expand-hint">◀拡大▶</span></th>
-                            <th class="col-details" onclick="toggleColumnExpand('review-table', 6)">詳細な役割 <span class="expand-hint">◀拡大▶</span></th>
-                        </tr>
-                    </thead>
-                    <tbody id="review-table-body">
-                    </tbody>
-                </table>
-            </div>
+    <div class="audio-player-panel">
+        <div class="audio-player-title">
+            <span>🎧 連続音声聞き流しモード</span>
         </div>
+        <div class="audio-controls">
+            <button id="btn-continuous-play" class="audio-btn audio-btn-play" onclick="toggleContinuousReading()">▶ 聞き流し開始</button>
+            <button id="btn-continuous-loop" class="audio-btn audio-btn-loop" onclick="toggleLoopAudio()">🔁 ループ: OFF</button>
+        </div>
+    </div>
+
+    <div class="search-hint">💡 <b>用語名をタップ</b>すると全7項目の詳細パネルが開きます</div>
+
+    <div class="table-wrapper">
+        <table id="review-table">
+            <thead>
+                <tr>
+                    <th class="col-star no-expand" style="text-align: center;">★</th>
+                    <th class="col-id no-expand">ID</th>
+                    <th class="col-term" onclick="toggleColumnExpand('review-table', 2)">用語 <span class="expand-hint">◀拡大▶</span></th>
+                    <th class="col-summary" onclick="toggleColumnExpand('review-table', 3)">2行要約メモ <span class="expand-hint">◀拡大▶</span></th>
+                    <th class="col-etymology" onclick="toggleColumnExpand('review-table', 4)">英語の翻訳・語源 <span class="expand-hint">◀拡大▶</span></th>
+                    <th class="col-keywords" onclick="toggleColumnExpand('review-table', 5)">逆引きキーワード <span class="expand-hint">◀拡大▶</span></th>
+                </tr>
+            </thead>
+            <tbody id="review-table-body">
+            </tbody>
+        </table>
+    </div>
+</div>
 
         <!-- ================= ⚙️ 設定・データタブ ================= -->
         <div id="tab-settings" class="tab-content">
@@ -1119,7 +1197,7 @@
                         <b>アプリバージョン</b>
                         <div class="setting-desc">用語データおよびシステムの更新状況</div>
                     </div>
-                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 2.6.0 (重み付き確率サンプリング穴埋め実装)</span>
+                    <span style="font-weight: bold; font-size: 1.0rem; color: var(--secondary);">ver 2.8.0 (全7項目表示対応モーダルパネル実装版)</span>
                 </div>
             </div>
 
@@ -1127,8 +1205,20 @@
 
     </div>
 
+    <!-- 🪟 用語詳細表示用モーダルパネル -->
+    <div id="term-modal-overlay" class="modal-overlay" onclick="closeTermModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close-btn" onclick="closeTermModal()">×</button>
+            <div class="modal-header">
+                <div id="modal-term-title" class="modal-term-title">用語名</div>
+                <button id="modal-speech-btn" class="audio-btn" style="margin-right: 10px;">🔊 読み上げ</button>
+            </div>
+            <div id="modal-body-content" class="modal-body">
+            </div>
+        </div>
+    </div>
+
     <script>
-        // 用語マスターデータの安全読み込み
         if (typeof TERMS_DATA === 'undefined') {
             console.warn("terms.js が読み込めていません。同フォルダ内に terms.js があるか確認してください。");
             window.TERMS_DATA = [];
@@ -1166,9 +1256,8 @@
         let deckIndex = 0;
         let lastTargetConfig = "";
 
-        // 音声関連状態管理
-        let isCardSpeaking = false; // 暗記カード個別再生中フラグ
-        let isContinuousReading = false; // 復習連続再生中フラグ
+        let isCardSpeaking = false;
+        let isContinuousReading = false;
         let isLoopAudioEnabled = false;
         let continuousIndex = 0;
         let continuousList = [];
@@ -1206,7 +1295,6 @@
 
             document.addEventListener("keydown", handleKeyPress);
 
-            // 行タップによるハイライト選択＆外側タップ解除
             document.addEventListener("click", (e) => {
                 const tr = e.target.closest("tbody tr");
                 const isStatusBtn = e.target.classList.contains("star-icon") || 
@@ -1225,7 +1313,6 @@
             });
         });
 
-        /* --- 🔥 ストリーク ＆ 🎯 ノルマ処理 --- */
         function checkStreakAndQuotaDate() {
             const today = new Date().toISOString().slice(0, 10);
             
@@ -1353,7 +1440,6 @@
             }
         }
 
-        /* --- 🧩 優先順位 ＆ 重み付き確率サンプリングによる【高度穴埋め】抽出アルゴリズム --- */
         function generateSmartClozeText(item, targetType) {
             const textToCloze = targetType === 'summary' ? item.summary : item.details;
             const complementText = targetType === 'summary' ? item.details : item.summary;
@@ -1372,7 +1458,6 @@
                 wordScores.set(trimmed, currentScore + scoreToAdd);
             };
 
-            // 1. 逆引きキーワード（最高優先度：スコア +10）
             if (item.keywords) {
                 item.keywords.split(/[\s,、・]+/).forEach(kw => {
                     if (kw.trim().length >= 2 && textToCloze.includes(kw.trim())) {
@@ -1381,7 +1466,6 @@
                 });
             }
 
-            // 2. 「」や『』の中身（高優先度：スコア +8）
             const regexQuote = /[「『]([^」』]+)[」』]/g;
             let matchQ;
             while ((matchQ = regexQuote.exec(textToCloze)) !== null) {
@@ -1390,7 +1474,6 @@
                 }
             }
 
-            // 3. ○○() の直前の○○ か ()の中身（中優先度：スコア +6）
             const regexParen = /([\u4E00-\u9FFFァ-ヶーa-zA-Z0-9]{2,})?[（\(]([^）\)]+)[）\)]/g;
             let matchP;
             while ((matchP = regexParen.exec(textToCloze)) !== null) {
@@ -1402,7 +1485,6 @@
                 }
             }
 
-            // 4. 一般語＆相関スコア抽出（標準：スコア 1〜5）
             const regexWord = /[\u4E00-\u9FFF]{2,}|[ァ-ヶー]{2,}|[a-zA-Z0-9]{2,}/g;
             let matchW;
             while ((matchW = regexWord.exec(textToCloze)) !== null) {
@@ -1419,7 +1501,6 @@
 
             if (wordScores.size === 0) return escapeHtml(textToCloze);
 
-            // 🎲 重み付き確率抽出関数（Efraimidis-Spirakis アルゴリズム）
             const weightedSample = (candidatesMap) => {
                 let sampled = [];
                 candidatesMap.forEach((score, word) => {
@@ -1438,7 +1519,6 @@
                 sentences.forEach(sentence => {
                     const lineLen = sentence.trim().length;
 
-                    // 文字数に応じた【最小値ルール】（40未満: 1個 / 40〜80: 2個 / 81以上: 3個）
                     let minCount = 1;
                     if (lineLen >= 81) {
                         minCount = 3;
@@ -1446,7 +1526,6 @@
                         minCount = 2;
                     }
 
-                    // 行内に存在する高スコア語句（6点以上：『』「」・()・逆引き等）をカウント
                     let highScoreCount = 0;
                     let sentenceMap = new Map();
                     wordScores.forEach((score, word) => {
@@ -1456,11 +1535,9 @@
                         }
                     });
 
-                    // 判定：高スコア語句が2個以上あれば確定で+1、そうでなければ65%の確率で+1
                     const shouldAddExtra = (highScoreCount >= 2) || (Math.random() < 0.65);
                     const neededCount = minCount + (shouldAddExtra ? 1 : 0);
 
-                    // 候補数が足りない場合は行内の一般語もプールに補填
                     if (sentenceMap.size < neededCount) {
                         const matches = sentence.match(/[\u4E00-\u9FFF]{2,}|[ァ-ヶー]{2,}|[a-zA-Z0-9]{2,}/g) || [];
                         matches.forEach(m => {
@@ -1470,7 +1547,6 @@
                         });
                     }
 
-                    // 重み付き確率に基づき優先度順でシャッフル抽出
                     const weightedWords = weightedSample(sentenceMap);
 
                     let addedForThisSentence = 0;
@@ -1497,13 +1573,11 @@
                 });
             }
 
-            // 長い単語から優先して置換（HTML破損防止）
             selectedClozeWords.sort((a, b) => b.length - a.length);
 
             let resultHtml = escapeHtml(textToCloze);
             const placeholderMap = new Map();
 
-            // 1. プレースホルダーへ置換
             selectedClozeWords.forEach((word, index) => {
                 const escapedWord = escapeHtml(word);
                 const placeholder = `___CLOZE_PH_${index}___`;
@@ -1515,7 +1589,6 @@
                 resultHtml = resultHtml.replace(regex, placeholder);
             });
 
-            // 2. プレースホルダーをHTMLタグへ復元
             placeholderMap.forEach((htmlTag, placeholder) => {
                 const regex = new RegExp(escapeRegExp(placeholder), 'g');
                 resultHtml = resultHtml.replace(regex, htmlTag);
@@ -1536,7 +1609,6 @@
             }
         }
 
-        /* --- 🔊 音声読み上げロジック --- */
         function speakText(text, onEndCallback) {
             if (!('speechSynthesis' in window)) {
                 console.warn("お使いのブラウザは音声読み上げに対応していません。");
@@ -1617,7 +1689,6 @@
             localStorage.setItem(AUTO_SPEECH_KEY, isAutoSpeechEnabled ? "true" : "false");
         }
 
-        /* --- 復習画面：連続音声聞き流し --- */
         function toggleContinuousReading() {
             if (isContinuousReading) {
                 stopContinuousReading();
@@ -2155,46 +2226,98 @@
             }
         }
 
-        function renderMasterTable() {
-            const tbody = document.getElementById("master-table-body");
-            if (!tbody) return;
-            const searchInput = document.getElementById("search-master");
-            const rawInput = searchInput ? searchInput.value.toLowerCase().trim() : "";
-            const keywords = rawInput.split(/[\s ]+/).filter(k => k.length > 0);
-            tbody.innerHTML = "";
+/* --- 🪟 モーダルパネル表示制御（学習効率重視の並び順） --- */
+function openTermModal(id) {
+    const item = TERMS_DATA.find(t => t.id === id);
+    if (!item) return;
 
-            TERMS_DATA.forEach(item => {
-                const fullText = (item.term + ' ' + item.summary + ' ' + item.keywords + ' ' + item.analogy + ' ' + item.details).toLowerCase();
-                const fullTextKata = hiraToKata(fullText);
-                const matchSearch = keywords.length === 0 || keywords.every(kw => {
-                    const kwKata = hiraToKata(kw.toLowerCase());
-                    return fullTextKata.includes(kwKata);
-                });
+    document.getElementById("modal-term-title").innerText = `ID.${item.id} ${item.term}`;
+    
+    const speechBtn = document.getElementById("modal-speech-btn");
+    if (speechBtn) {
+        speechBtn.onclick = () => speakText(`${item.term}。${item.summary}`);
+    }
 
-                if (matchSearch) {
-                    const isStarred = starredIds.has(item.id);
-                    const isFuzzy = fuzzyIds.has(item.id);
-                    const isMastered = masteredIds.has(item.id);
-                    const tr = document.createElement("tr");
-                    tr.innerHTML = `
-                        <td class="col-star" style="text-align:center;">
-                            <div class="status-btn-group">
-                                <span class="star-icon ${isStarred ? 'active' : ''}" data-id="${item.id}" onclick="toggleStar(${item.id})" title="要復習">${isStarred ? '★' : '☆'}</span>
-                                <span class="status-icon fuzzy-icon ${isFuzzy ? 'active' : ''}" data-id="${item.id}" onclick="toggleFuzzy(${item.id})" title="あいまい">🤔</span>
-                                <span class="status-icon master-icon ${isMastered ? 'active' : ''}" data-id="${item.id}" onclick="toggleMaster(${item.id})" title="覚えた">✅</span>
-                            </div>
-                        </td>
-                        <td class="col-id">${item.id}</td>
-                        <td class="col-term" style="font-weight:bold;">${highlightText(item.term, keywords)}</td>
-                        <td class="col-summary">${highlightText(item.summary, keywords)}</td>
-                        <td class="col-keywords">${highlightText(item.keywords, keywords)}</td>
-                        <td class="col-analogy">${highlightText(item.analogy, keywords)}</td>
-                        <td class="col-details">${highlightText(item.details, keywords)}</td>
-                    `;
-                    tbody.appendChild(tr);
-                }
-            });
+    const modalBody = document.getElementById("modal-body-content");
+    modalBody.innerHTML = `
+        <div class="detail-item">
+            <div class="detail-item-title">📖 詳細な役割</div>
+            <div class="detail-item-content">${escapeHtml(item.details || '-')}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-item-title">🐟 例を用いたわかりやすい解釈</div>
+            <div class="detail-item-content">${escapeHtml(item.analogy || '-')}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-item-title">📌 2行要約メモ</div>
+            <div class="detail-item-content">${escapeHtml(item.summary)}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-item-title">🎯 試験での頻出・関連箇所</div>
+            <div class="detail-item-content">${escapeHtml(item.exam || '-')}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-item-title">📝 30字定義</div>
+            <div class="detail-item-content">${escapeHtml(item.def30 || '-')}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-item-title">🔤 英語の翻訳・語源からの理解</div>
+            <div class="detail-item-content">${escapeHtml(item.etymology || '-')}</div>
+        </div>
+        <div class="detail-item">
+            <div class="detail-item-title">🔍 逆引きキーワード</div>
+            <div class="detail-item-content">${escapeHtml(item.keywords || '-')}</div>
+        </div>
+    `;
+
+    document.getElementById("term-modal-overlay").style.display = "flex";
+}
+
+        function closeTermModal(event) {
+            if (event) event.stopPropagation();
+            document.getElementById("term-modal-overlay").style.display = "none";
+            if ('speechSynthesis' in window) window.speechSynthesis.cancel();
         }
+
+        function renderMasterTable() {
+    const tbody = document.getElementById("master-table-body");
+    if (!tbody) return;
+    const searchInput = document.getElementById("search-master");
+    const rawInput = searchInput ? searchInput.value.toLowerCase().trim() : "";
+    const keywords = rawInput.split(/[\s ]+/).filter(k => k.length > 0);
+    tbody.innerHTML = "";
+
+    TERMS_DATA.forEach(item => {
+        const fullText = (item.term + ' ' + item.summary + ' ' + (item.etymology || '') + ' ' + item.keywords + ' ' + item.analogy + ' ' + item.details).toLowerCase();
+        const fullTextKata = hiraToKata(fullText);
+        const matchSearch = keywords.length === 0 || keywords.every(kw => {
+            const kwKata = hiraToKata(kw.toLowerCase());
+            return fullTextKata.includes(kwKata);
+        });
+
+        if (matchSearch) {
+            const isStarred = starredIds.has(item.id);
+            const isFuzzy = fuzzyIds.has(item.id);
+            const isMastered = masteredIds.has(item.id);
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+                <td class="col-star" style="text-align:center;">
+                    <div class="status-btn-group">
+                        <span class="star-icon ${isStarred ? 'active' : ''}" data-id="${item.id}" onclick="toggleStar(${item.id})" title="要復習">${isStarred ? '★' : '☆'}</span>
+                        <span class="status-icon fuzzy-icon ${isFuzzy ? 'active' : ''}" data-id="${item.id}" onclick="toggleFuzzy(${item.id})" title="あいまい">🤔</span>
+                        <span class="status-icon master-icon ${isMastered ? 'active' : ''}" data-id="${item.id}" onclick="toggleMaster(${item.id})" title="覚えた">✅</span>
+                    </div>
+                </td>
+                <td class="col-id">${item.id}</td>
+                <td class="col-term col-term-clickable" onclick="openTermModal(${item.id})" title="タップして7項目すべての詳細を表示">${highlightText(item.term, keywords)}</td>
+                <td class="col-summary">${highlightText(item.summary, keywords)}</td>
+                <td class="col-etymology">${highlightText(item.etymology || '', keywords)}</td>
+                <td class="col-keywords">${highlightText(item.keywords || '', keywords)}</td>
+            `;
+            tbody.appendChild(tr);
+        }
+    });
+}
 
         function filterMasterTable() {
             renderMasterTable();
@@ -2216,56 +2339,55 @@
         }
 
         function renderReviewTable() {
-            const tbody = document.getElementById("review-table-body");
-            if (!tbody) return;
-            tbody.innerHTML = "";
+    const tbody = document.getElementById("review-table-body");
+    if (!tbody) return;
+    tbody.innerHTML = "";
 
-            let targetList = [];
-            let emptyMessage = "";
+    let targetList = [];
+    let emptyMessage = "";
 
-            if (currentReviewSubTab === "starred") {
-                targetList = TERMS_DATA.filter(item => starredIds.has(item.id));
-                emptyMessage = "⭐ 現在、要復習（★）がついている用語はありません。";
-            } else if (currentReviewSubTab === "fuzzy") {
-                targetList = TERMS_DATA.filter(item => fuzzyIds.has(item.id));
-                emptyMessage = "🤔 現在、あいまい（🤔）に設定されている用語はありません。";
-            } else if (currentReviewSubTab === "mastered") {
-                targetList = TERMS_DATA.filter(item => masteredIds.has(item.id));
-                emptyMessage = "✅ 現在、覚えた（✅）に設定されている用語はありません。";
-            }
+    if (currentReviewSubTab === "starred") {
+        targetList = TERMS_DATA.filter(item => starredIds.has(item.id));
+        emptyMessage = "⭐ 現在、要復習（★）がついている用語はありません。";
+    } else if (currentReviewSubTab === "fuzzy") {
+        targetList = TERMS_DATA.filter(item => fuzzyIds.has(item.id));
+        emptyMessage = "🤔 現在、あいまい（🤔）に設定されている用語はありません。";
+    } else if (currentReviewSubTab === "mastered") {
+        targetList = TERMS_DATA.filter(item => masteredIds.has(item.id));
+        emptyMessage = "✅ 現在、覚えた（✅）に設定されている用語はありません。";
+    }
 
-            if (targetList.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="7" style="text-align:center; padding: 30px; color: var(--text-muted);">${emptyMessage}</td></tr>`;
-                return;
-            }
+    if (targetList.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 30px; color: var(--text-muted);">${emptyMessage}</td></tr>`;
+        return;
+    }
 
-            const searchInput = document.getElementById("search-master");
-            const rawInput = searchInput ? searchInput.value.toLowerCase().trim() : "";
-            const keywords = rawInput.split(/[\s ]+/).filter(k => k.length > 0);
+    const searchInput = document.getElementById("search-master");
+    const rawInput = searchInput ? searchInput.value.toLowerCase().trim() : "";
+    const keywords = rawInput.split(/[\s ]+/).filter(k => k.length > 0);
 
-            targetList.forEach(item => {
-                const isStarred = starredIds.has(item.id);
-                const isFuzzy = fuzzyIds.has(item.id);
-                const isMastered = masteredIds.has(item.id);
-                const tr = document.createElement("tr");
-                tr.innerHTML = `
-                    <td class="col-star" style="text-align:center;">
-                        <div class="status-btn-group">
-                            <span class="star-icon ${isStarred ? 'active' : ''}" data-id="${item.id}" onclick="toggleStar(${item.id})" title="要復習">${isStarred ? '★' : '☆'}</span>
-                            <span class="status-icon fuzzy-icon ${isFuzzy ? 'active' : ''}" data-id="${item.id}" onclick="toggleFuzzy(${item.id})" title="あいまい">🤔</span>
-                            <span class="status-icon master-icon ${isMastered ? 'active' : ''}" data-id="${item.id}" onclick="toggleMaster(${item.id})" title="覚えた">✅</span>
-                        </div>
-                    </td>
-                    <td class="col-id">${item.id}</td>
-                    <td class="col-term" style="font-weight:bold;">${highlightText(item.term, keywords)}</td>
-                    <td class="col-summary">${highlightText(item.summary, keywords)}</td>
-                    <td class="col-keywords">${highlightText(item.keywords, keywords)}</td>
-                    <td class="col-analogy">${highlightText(item.analogy, keywords)}</td>
-                    <td class="col-details">${highlightText(item.details, keywords)}</td>
-                `;
-                tbody.appendChild(tr);
-            });
-        }
+    targetList.forEach(item => {
+        const isStarred = starredIds.has(item.id);
+        const isFuzzy = fuzzyIds.has(item.id);
+        const isMastered = masteredIds.has(item.id);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td class="col-star" style="text-align:center;">
+                <div class="status-btn-group">
+                    <span class="star-icon ${isStarred ? 'active' : ''}" data-id="${item.id}" onclick="toggleStar(${item.id})" title="要復習">${isStarred ? '★' : '☆'}</span>
+                    <span class="status-icon fuzzy-icon ${isFuzzy ? 'active' : ''}" data-id="${item.id}" onclick="toggleFuzzy(${item.id})" title="あいまい">🤔</span>
+                    <span class="status-icon master-icon ${isMastered ? 'active' : ''}" data-id="${item.id}" onclick="toggleMaster(${item.id})" title="覚えた">✅</span>
+                </div>
+            </td>
+            <td class="col-id">${item.id}</td>
+            <td class="col-term col-term-clickable" onclick="openTermModal(${item.id})" title="タップして7項目すべての詳細を表示">${highlightText(item.term, keywords)}</td>
+            <td class="col-summary">${highlightText(item.summary, keywords)}</td>
+            <td class="col-etymology">${highlightText(item.etymology || '', keywords)}</td>
+            <td class="col-keywords">${highlightText(item.keywords || '', keywords)}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
 
         function hiraToKata(str) {
             if (!str) return "";
