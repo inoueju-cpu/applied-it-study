@@ -1440,11 +1440,17 @@
             }
         }
 
-        function generateSmartClozeText(item, targetType) {
+function generateSmartClozeText(item, targetType) {
             const textToCloze = targetType === 'summary' ? item.summary : item.details;
             const complementText = targetType === 'summary' ? item.details : item.summary;
 
             if (!textToCloze) return "";
+
+            // 🚫 穴埋めにしたくない除外単語（ブラックリスト）
+            const ignoreWords = new Set([
+                '前者', '後者', '機能', '技術', '装置',
+                '場合', '利用', '使用', '処理','用語',
+            ]);
 
             let wordScores = new Map();
 
@@ -1454,41 +1460,62 @@
                 if (trimmed.length < 2) return;
                 if (!/[\u4E00-\u9FFFァ-ヶーa-zA-Z0-9]/.test(trimmed)) return;
 
+                // 除外単語リストに含まれている場合はスコア加算をスキップ
+                if (ignoreWords.has(trimmed)) return;
+
                 const currentScore = wordScores.get(trimmed) || 0;
                 wordScores.set(trimmed, currentScore + scoreToAdd);
             };
 
+            // 1. 「」や『』で囲まれた単語 ➔ 最優先（+10点）
+            const regexQuote = /[「『]([^」』]+)[」』]/g;
+            let matchQ;
+            const seenQuotes = new Set();
+            while ((matchQ = regexQuote.exec(textToCloze)) !== null) {
+                const qWord = matchQ[1] ? matchQ[1].trim() : "";
+                if (qWord && textToCloze.includes(qWord) && !seenQuotes.has(qWord)) {
+                    seenQuotes.add(qWord);
+                    addWordScore(qWord, 10);
+                }
+            }
+
+            // 2. 逆引きキーワードに含まれる単語 ➔ 次優先（+8点）
             if (item.keywords) {
+                const seenKeywords = new Set();
                 item.keywords.split(/[\s,、・]+/).forEach(kw => {
-                    if (kw.trim().length >= 2 && textToCloze.includes(kw.trim())) {
-                        addWordScore(kw.trim(), 10);
+                    const kWord = kw.trim();
+                    if (kWord.length >= 2 && textToCloze.includes(kWord) && !seenKeywords.has(kWord)) {
+                        seenKeywords.add(kWord);
+                        addWordScore(kWord, 8);
                     }
                 });
             }
 
-            const regexQuote = /[「『]([^」』]+)[」』]/g;
-            let matchQ;
-            while ((matchQ = regexQuote.exec(textToCloze)) !== null) {
-                if (matchQ[1] && textToCloze.includes(matchQ[1])) {
-                    addWordScore(matchQ[1], 8);
-                }
-            }
-
+            // 3. （）カッコ内や直前の単語 ➔ （+6点）
             const regexParen = /([\u4E00-\u9FFFァ-ヶーa-zA-Z0-9]{2,})?[（\(]([^）\)]+)[）\)]/g;
             let matchP;
+            const seenParens = new Set();
             while ((matchP = regexParen.exec(textToCloze)) !== null) {
-                if (matchP[1] && textToCloze.includes(matchP[1])) {
+                if (matchP[1] && textToCloze.includes(matchP[1]) && !seenParens.has(matchP[1])) {
+                    seenParens.add(matchP[1]);
                     addWordScore(matchP[1], 6);
                 }
-                if (matchP[2] && textToCloze.includes(matchP[2])) {
+                if (matchP[2] && textToCloze.includes(matchP[2]) && !seenParens.has(matchP[2])) {
+                    seenParens.add(matchP[2]);
                     addWordScore(matchP[2], 6);
                 }
             }
 
+            // 4. 通常単語の分解とスコア加算（同項目内での重複加算防止）
             const regexWord = /[\u4E00-\u9FFF]{2,}|[ァ-ヶー]{2,}|[a-zA-Z0-9]{2,}/g;
             let matchW;
+            const seenWordsInText = new Set();
             while ((matchW = regexWord.exec(textToCloze)) !== null) {
                 const word = matchW[0];
+
+                if (seenWordsInText.has(word)) continue;
+                seenWordsInText.add(word);
+
                 let score = 1;
                 if (complementText && complementText.includes(word)) {
                     score += 3;
@@ -1541,7 +1568,7 @@
                     if (sentenceMap.size < neededCount) {
                         const matches = sentence.match(/[\u4E00-\u9FFF]{2,}|[ァ-ヶー]{2,}|[a-zA-Z0-9]{2,}/g) || [];
                         matches.forEach(m => {
-                            if (!sentenceMap.has(m)) {
+                            if (!sentenceMap.has(m) && !ignoreWords.has(m)) {
                                 sentenceMap.set(m, 1);
                             }
                         });
