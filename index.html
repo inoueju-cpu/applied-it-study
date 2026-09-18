@@ -439,6 +439,14 @@
         .ans-box .box-body {
             color: var(--text-main);
             font-size: 1.15rem;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.2s ease;
+            border-radius: 8px;
+        }
+
+        .ans-box .box-body:hover {
+            background-color: var(--expand-bg);
         }
 
         .mask-overlay {
@@ -1041,11 +1049,11 @@
                 </div>
 
                 <div id="answer-mask" class="mask-overlay" onclick="toggleAnswer()">
-                    🙈 タップ / クリックで正解と全7項目の詳細解説を表示します
+                    🙈 タップ / クリックで全項目の正解・詳細解説を表示します
                 </div>
 
                 <div id="answer-content" style="display: none;">
-                    <div id="answer-main-text" class="box-body" style="border-bottom: 2px solid #f0e6b5; margin-bottom: 15px;">
+                    <div id="answer-main-text" class="box-body" onclick="toggleAnswer()" style="border-bottom: 2px solid #f0e6b5; margin-bottom: 15px;" title="タップ / クリックで正解を隠します">
                         -
                     </div>
                     <div id="details-container" class="details-container">
@@ -1449,7 +1457,7 @@ function generateSmartClozeText(item, targetType) {
             // 🚫 穴埋めにしたくない除外単語（ブラックリスト）
             const ignoreWords = new Set([
                 '前者', '後者', '機能', '技術', '装置',
-                '場合', '利用', '使用', '処理','用語',
+                '場合', '利用', '使用', '処理','用語','攻撃。',
             ]);
 
             let wordScores = new Map();
